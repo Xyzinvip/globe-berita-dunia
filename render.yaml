@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: globe-berita-dunia
+    runtime: node
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEWS_API_KEY
+        sync: false
+      - key: GNEWS_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
