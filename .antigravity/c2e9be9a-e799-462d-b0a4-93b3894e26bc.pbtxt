@@ -1,0 +1,674 @@
+steps {
+  type: CORTEX_STEP_TYPE_USER_INPUT
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790433697
+      nanos: 90724000
+    }
+    source: CORTEX_STEP_SOURCE_SYSTEM
+    completed_at {
+      seconds: 1790433697
+      nanos: 90724000
+    }
+  }
+  user_input {
+    user_response: "Here is the full initial file tree for the application:\n/.env.example\n/.gitignore\n/bun.lock\n/index.html\n/metadata.json\n/package.json\n/public/apple-touch-icon.png\n/public/icon.svg\n/public/pwa-192x192.png\n/public/pwa-512x512.png\n/public/pwa-maskable-512x512.png\n/server.ts\n/src/App.tsx\n/src/components/APKInstallModal.tsx\n/src/components/BreakingNewsTicker.tsx\n/src/components/CountryListView.tsx\n/src/components/CountryNewsSheet.tsx\n/src/components/EconomicCalendarView.tsx\n/src/components/GeminiChatModal.tsx\n/src/components/GlobeCanvas.tsx\n/src/components/InAppArticleReader.tsx\n/src/components/InAppPushBanner.tsx\n/src/components/NotificationCenterModal.tsx\n/src/components/PersonalizedFeedView.tsx\n/src/components/SavedArticlesView.tsx\n/src/components/TopNav.tsx\n/src/components/UserProfileModal.tsx\n/src/data/countries.ts\n/src/data/economicCalendar.ts\n/src/data/newsData.ts\n/src/hooks/usePWAInstall.ts\n/src/index.css\n/src/main.tsx\n/src/services/geminiService.ts\n/src/services/newsApi.ts\n/src/services/notificationService.ts\n/src/types/index.ts\n/src/utils/speech.ts\n/src/utils/storage.ts\n/tsconfig.json\n/vite.config.ts\n\nThe following dependencies are installed:\n@google/genai: ^2.4.0\n@tailwindcss/vite: ^4.3.3\n@vitejs/plugin-react: ^6.1.1\ncanvas-confetti: ^1.9.4\nd3: ^7.9.0\ndotenv: ^17.2.3\nexpress: ^4.21.2\nlucide-react: ^0.546.0\nmotion: ^12.23.24\nreact: ^19.0.1\nreact-dom: ^19.0.1\nrss-parser: ^3.13.0\ntopojson-client: ^3.1.0\nvite: ^8.3.0\nworld-atlas: ^2.0.2\n\nThe following devDependencies are installed:\n@types/canvas-confetti: ^1.9.0\n@types/d3: ^7.4.3\n@types/express: ^4.17.21\n@types/node: ^22.14.0\n@types/react: ^19.3.0\n@types/react-dom: ^19.3.0\n@types/topojson-client: ^3.1.5\nautoprefixer: ^10.4.21\nesbuild: ^0.25.0\ntailwindcss: ^4.3.3\ntsx: ^4.21.0\ntypescript: ^7.0.2\nvite-plugin-pwa: ^1.3.0\n\nKey file contents:\n\n--- /.env.example ---\n```\n# GEMINI_API_KEY: Required for Gemini AI API calls.\n# AI Studio automatically injects this at runtime from user secrets.\n# Users configure this via the Secrets panel in the AI Studio UI.\nGEMINI_API_KEY=\"MY_GEMINI_API_KEY\"\n\n# APP_URL: The URL where this applet is hosted.\n# AI Studio automatically injects this at runtime with the Cloud Run service URL.\n# Used for self-referential links, OAuth callbacks, and API endpoints.\nAPP_URL=\"MY_APP_URL\"\n\n# GNEWS_API_KEY: Optional API key for GNews.io live news integration\nGNEWS_API_KEY=\"\"\n\n# NEWS_API_KEY: Optional API key for NewsAPI.org live news integration\nNEWS_API_KEY=\"\"\n\n```\n\n--- /index.html ---\n```html\n<!doctype html>\n<html lang=\"id\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover\" />\n    <title>Globe Berita Dunia Mobile (APK)</title>\n    <meta name=\"description\" content=\"Aplikasi mobile interaktif berita dunia dengan visualisasi globe 3D, pembaca berita in-app tanpa keluar aplikasi, kalender ekonomi, dan instalasi PWA/APK.\" />\n    <meta property=\"og:title\" content=\"Globe Berita Dunia Mobile (APK)\" />\n    <meta property=\"og:description\" content=\"Aplikasi mobile interaktif berita dunia dengan visualisasi globe 3D, pembaca berita in-app tanpa keluar aplikasi, kalender ekonomi, dan instalasi PWA/APK.\" />\n    <meta property=\"og:type\" content=\"website\" />\n    <meta name=\"twitter:card\" content=\"summary_large_image\" />\n    \n    <!-- Mobile PWA & APK Standalone optimizations -->\n    <meta name=\"theme-color\" content=\"#03040c\" />\n    <meta name=\"mobile-web-app-capable\" content=\"yes\" />\n    <meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />\n    <meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\" />\n    <meta name=\"apple-mobile-web-app-title\" content=\"GlobeBerita\" />\n    <meta name=\"format-detection\" content=\"telephone=no\" />\n    \n    <!-- Icons -->\n    <link rel=\"icon\" type=\"image/svg+xml\" href=\"/icon.svg\" />\n    <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\" />\n    \n    <!-- Google Fonts for crisp typography -->\n    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\" />\n    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin />\n    <link href=\"https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap\" rel=\"stylesheet\" />\n  </head>\n  <body class=\"bg-[#02030a] text-slate-100 select-none antialiased overflow-hidden overscroll-none\">\n    <div id=\"root\"></div>\n    <script type=\"module\" src=\"/src/main.tsx\"></script>\n  </body>\n</html>\n\n```\n\n--- /metadata.json ---\n```json\n{\n  \"name\": \"Remix Globe Berita Dunia Mobile (APK)\",\n  \"description\": \"Aplikasi mobile interaktif berita dunia dengan visualisasi globe 3D, pembaca berita in-app tanpa keluar aplikasi, kalender ekonomi, dan instalasi PWA/APK.\",\n  \"requestFramePermissions\": [],\n  \"majorCapabilities\": [\n    \"MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API\"\n  ]\n}\n```\n\n--- /src/App.tsx ---\n```typescript\nimport React, { useState, useEffect, useMemo, useCallback } from \'react\';\nimport { GlobeCanvas } from \'./components/GlobeCanvas\';\nimport { TopNav } from \'./components/TopNav\';\nimport { BreakingNewsTicker } from \'./components/BreakingNewsTicker\';\nimport { CountryNewsSheet } from \'./components/CountryNewsSheet\';\nimport { InAppArticleReader } from \'./components/InAppArticleReader\';\nimport { EconomicCalendarView } from \'./components/EconomicCalendarView\';\nimport { SavedArticlesView } from \'./components/SavedArticlesView\';\nimport { CountryListView } from \'./components/CountryListView\';\nimport { APKInstallModal } from \'./components/APKInstallModal\';\nimport { UserProfileModal } from \'./components/UserProfileModal\';\nimport { NotificationCenterModal } from \'./components/NotificationCenterModal\';\nimport { PersonalizedFeedView } from \'./components/PersonalizedFeedView\';\nimport { InAppPushBanner } from \'./components/InAppPushBanner\';\nimport { CountryInfo, NewsArticle, UserProfile } from \'./types\';\nimport { getCountryInfo } from \'./data/countries\';\nimport { getNewsForCountry, CURATED_NEWS, FALLBACK_WORLD_NEWS } from \'./data/newsData\';\nimport { getUserProfile, getNotifications } from \'./utils/storage\';\nimport { notificationService } from \'./services/notificationService\';\nimport { fetchLiveNews } from \'./services/newsApi\';\n\nexport default function App() {\n  const [selectedCountry, setSelectedCountry] = useState<CountryInfo | null>(null);\n  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);\n  const [autoRotate, setAutoRotate] = useState<boolean>(true);\n  const [theme, setTheme] = useState<\'dark\' | \'light\'>(\'dark\');\n\n  // Modals & views\n  const [showEconomicCalendar, setShowEconomicCalendar] = useState<boolean>(false);\n  const [showSavedArticles, setShowSavedArticles] = useState<boolean>(false);\n  const [showCountryList, setShowCountryList] = useState<boolean>(false);\n  const [showAPKModal, setShowAPKModal] = useState<boolean>(false);\n  const [showProfileModal, setShowProfileModal] = useState<boolean>(false);\n  const [showNotificationsModal, setShowNotificationsModal] = useState<boolean>(false);\n  const [showForYouFeed, setShowForYouFeed] = useState<boolean>(false);\n\n  // User Profile\n  const [userProfile, setUserProfile] = useState<UserProfile>(getUserProfile);\n  const [unreadNotifCount, setUnreadNotifCount] = useState<number>(0);\n\n  // Live pool of articles\n  const [allArticles, setAllArticles] = useState<NewsArticle[]>(() => {\n    const list = Object.values(CURATED_NEWS).flat();\n    return [...list, ...FALLBACK_WORLD_NEWS];\n  });\n\n  // Sync theme\n  useEffect(() => {\n    document.documentElement.setAttribute(\'data-theme\', theme);\n  }, [theme]);\n\n  // Update unread notification count\n  const refreshUnreadCount = useCallback(() => {\n    const notifs = getNotifications();\n    const unread = notifs.filter((n) => !n.isRead).length;\n    setUnreadNotifCount(unread);\n  }, []);\n\n  useEffect(() => {\n    refreshUnreadCount();\n  }, [refreshUnreadCount, showNotificationsModal]);\n\n  // Load live news headlines initially in background\n  useEffect(() => {\n    fetchLiveNews({ q: \'dunia\' })\n      .then((live) => {\n        if (live && live.length > 0) {\n          setAllArticles((prev) => {\n            const existingIds = new Set(prev.map((a) => a.id));\n            const newOnes = live.filter((a) => !existingIds.has(a.id));\n            return [...newOnes, ...prev];\n          });\n        }\n      })\n      .catch((err) => {\n        console.warn(\'Initial live news load error:\', err);\n      });\n  }, []);\n\n  // Handle article tap from notifications\n  const handleOpenArticleById = useCallback(\n    (articleId: string) => {\n      const found = allArticles.find((a) => a.id === articleId);\n      if (found) {\n        setSelectedArticle(found);\n        return;\n      }\n      // If not in current list, search curated\n      const allCurated = Object.values(CURATED_NEWS).flat();\n      const match = allCurated.find((a) => a.id === articleId);\n      if (match) {\n        setSelectedArticle(match);\n      }\n    },\n    [allArticles]\n  );\n\n  useEffect(() => {\n    const unsub = notificationService.onNotificationTap((articleId) => {\n      handleOpenArticleById(articleId);\n      refreshUnreadCount();\n    });\n    return unsub;\n  }, [handleOpenArticleById, refreshUnreadCount]);\n\n  // Periodic push notification simulation for preferred topics / categories\n  useEffect(() => {\n    if (!userProfile.notificationsEnabled) return;\n\n    // Trigger initial notification after 8 seconds if never received\n    const initialTimer = setTimeout(() => {\n      const existing = getNotifications();\n      if (existing.length === 0) {\n        const pool = allArticles.filter((art) =>\n          userProfile.selectedCategories.some(\n            (c) => c.toLowerCase() === art.category.toLowerCase()\n          )\n        );\n        const pick = pool[0] || allArticles[0];\n        if (pick) {\n          notificationService.sendArticleNotification(pick, \'breaking\');\n          refreshUnreadCount();\n        }\n      }\n    }, 8000);\n\n    // Periodic check every 3 minutes\n    const interval = setInterval(() => {\n      if (!userProfile.notificationsEnabled) return;\n      const candidates = allArticles.filter((art) => art.isBreaking);\n      const pick = candidates[Math.floor(Math.random() * candidates.length)] || allArticles[0];\n      if (pick) {\n        notificationService.sendArticleNotification(pick, \'breaking\');\n        refreshUnreadCount();\n      }\n    }, 180000);\n\n    return () => {\n      clearTimeout(initialTimer);\n      clearInterval(interval);\n    };\n  }, [userProfile.notificationsEnabled, userProfile.selectedCategories, allArticles, refreshUnreadCount]);\n\n  // Keyboard navigation shortcuts for desktop\n  useEffect(() => {\n    const handleKeyDown = (e: KeyboardEvent) => {\n      // Don\'t intercept if user is typing in an input\n      if ([\'INPUT\', \'TEXTAREA\'].includes((e.target as HTMLElement)?.tagName)) {\n        return;\n      }\n\n      if (e.key === \'Escape\') {\n        setSelectedArticle(null);\n        setSelectedCountry(null);\n        setShowProfileModal(false);\n        setShowNotificationsModal(false);\n        setShowForYouFeed(false);\n        setShowEconomicCalendar(false);\n        setShowSavedArticles(false);\n        setShowCountryList(false);\n        setShowAPKModal(false);\n      } else if (e.code === \'Space\') {\n        e.preventDefault();\n        setAutoRotate((prev) => !prev);\n      } else if (e.key === \'p\' || e.key === \'P\') {\n        setShowProfileModal((prev) => !prev);\n      } else if (e.key === \'n\' || e.key === \'N\') {\n        setShowNotificationsModal((prev) => !prev);\n      } else if (e.key === \'f\' || e.key === \'F\') {\n        setShowForYouFeed((prev) => !prev);\n      } else if (e.key === \'t\' || e.key === \'T\') {\n        setTheme((prev) => (prev === \'dark\' ? \'light\' : \'dark\'));\n      }\n    };\n\n    window.addEventListener(\'keydown\', handleKeyDown);\n    return () => window.removeEventListener(\'keydown\', handleKeyDown);\n  }, []);\n\n  const handleSelectCountry = (country: CountryInfo | null) => {\n    setSelectedCountry(country);\n    if (country) {\n      setAutoRotate(false);\n    }\n  };\n\n  const handleSelectCountryByName = (name: string) => {\n    const country = getCountryInfo(name);\n    handleSelectCountry(country);\n  };\n\n  const handleOpenArticle = (article: NewsArticle) => {\n    setSelectedArticle(article);\n  };\n\n  const relatedArticles = useMemo(() => {\n    if (!selectedArticle) return [];\n    return getNewsForCountry(selectedArticle.countryName, selectedArticle.countryCode);\n  }, [selectedArticle]);\n\n... (truncated)\n```\n\n--- /src/index.css ---\n```css\n@import \"tailwindcss\";\n\n:root {\n  --safe-top: env(safe-area-inset-top, 0px);\n  --safe-bottom: env(safe-area-inset-bottom, 0px);\n  font-family: \'Plus Jakarta Sans\', -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;\n  -webkit-tap-highlight-color: transparent;\n}\n\n/* Custom styled sleek scrollbars */\n::-webkit-scrollbar {\n  width: 5px;\n  height: 5px;\n}\n::-webkit-scrollbar-track {\n  background: transparent;\n}\n::-webkit-scrollbar-thumb {\n  background: rgba(255, 255, 255, 0.16);\n  border-radius: 9999px;\n}\n::-webkit-scrollbar-thumb:hover {\n  background: rgba(255, 255, 255, 0.3);\n}\n\n@keyframes pulseGlow {\n  0%, 100% {\n    opacity: 0.9;\n    transform: scale(1);\n  }\n  50% {\n    opacity: 0.4;\n    transform: scale(0.97);\n  }\n}\n\n.animate-pulse-glow {\n  animation: pulseGlow 2.5s ease-in-out infinite;\n}\n\n```\n\n--- /src/main.tsx ---\n```typescript\nimport {StrictMode} from \'react\';\nimport {createRoot} from \'react-dom/client\';\nimport App from \'./App.tsx\';\nimport \'./index.css\';\n\ncreateRoot(document.getElementById(\'root\')!).render(\n  <StrictMode>\n    <App />\n  </StrictMode>,\n);\n\n```\n\n--- /tsconfig.json ---\n```json\n{\n  \"compilerOptions\": {\n    \"target\": \"ES2022\",\n    \"experimentalDecorators\": true,\n    \"useDefineForClassFields\": false,\n    \"module\": \"ESNext\",\n    \"types\": [\"vite/client\", \"vite-plugin-pwa/client\"],\n    \"lib\": [\n      \"ES2022\",\n      \"DOM\",\n      \"DOM.Iterable\"\n    ],\n    \"skipLibCheck\": true,\n    \"moduleResolution\": \"bundler\",\n    \"isolatedModules\": true,\n    \"moduleDetection\": \"force\",\n    \"allowJs\": true,\n    \"jsx\": \"react-jsx\",\n    \"paths\": {\n      \"@/*\": [\n        \"./*\"\n      ]\n    },\n    \"allowImportingTsExtensions\": true,\n    \"noEmit\": true\n  }\n}\n\n```\n\n--- /vite.config.ts ---\n```typescript\nimport tailwindcss from \'@tailwindcss/vite\';\nimport react from \'@vitejs/plugin-react\';\nimport path from \'path\';\nimport { fileURLToPath } from \'url\';\nimport { defineConfig } from \'vite\';\nimport { VitePWA } from \'vite-plugin-pwa\';\n\nconst __filename = fileURLToPath(import.meta.url);\nconst __dirname = path.dirname(__filename);\n\nexport default defineConfig(() => {\n  return {\n    plugins: [\n      react(),\n      tailwindcss(),\n      VitePWA({\n        registerType: \'autoUpdate\',\n        includeAssets: [\'favicon.ico\', \'apple-touch-icon.png\', \'icon.svg\'],\n        manifest: {\n          id: \'/\',\n          name: \'Globe Berita Dunia Mobile (APK)\',\n          short_name: \'GlobeBerita\',\n          description: \'Aplikasi mobile interaktif berita dunia dengan visualisasi globe 3D, pembaca berita in-app tanpa keluar aplikasi, kalender ekonomi, dan instalasi PWA/APK.\',\n          theme_color: \'#050816\',\n          background_color: \'#02030a\',\n          display: \'standalone\',\n          orientation: \'portrait-primary\',\n          start_url: \'/\',\n          scope: \'/\',\n          categories: [\'news\', \'magazines\', \'education\'],\n          icons: [\n            {\n              src: \'/pwa-192x192.png\',\n              sizes: \'192x192\',\n              type: \'image/png\',\n              purpose: \'any\',\n            },\n            {\n              src: \'/pwa-512x512.png\',\n              sizes: \'512x512\',\n              type: \'image/png\',\n              purpose: \'any\',\n            },\n            {\n              src: \'/pwa-maskable-512x512.png\',\n              sizes: \'512x512\',\n              type: \'image/png\',\n              purpose: \'maskable\',\n            },\n          ],\n        },\n        workbox: {\n          globPatterns: [\'**/*.{js,css,html,ico,png,svg,woff,woff2,json}\'],\n        },\n        devOptions: {\n          enabled: false,\n        },\n      }),\n    ],\n    resolve: {\n      alias: {\n        \'@\': path.resolve(__dirname, \'.\'),\n      },\n    },\n    server: {\n      port: 3000,\n      host: \'0.0.0.0\',\n      hmr: process.env.DISABLE_HMR !== \'true\',\n      watch: process.env.DISABLE_HMR === \'true\' ? null : {},\n    },\n  };\n});\n\n```"
+    items {
+      text: "Here is the full initial file tree for the application:\n/.env.example\n/.gitignore\n/bun.lock\n/index.html\n/metadata.json\n/package.json\n/public/apple-touch-icon.png\n/public/icon.svg\n/public/pwa-192x192.png\n/public/pwa-512x512.png\n/public/pwa-maskable-512x512.png\n/server.ts\n/src/App.tsx\n/src/components/APKInstallModal.tsx\n/src/components/BreakingNewsTicker.tsx\n/src/components/CountryListView.tsx\n/src/components/CountryNewsSheet.tsx\n/src/components/EconomicCalendarView.tsx\n/src/components/GeminiChatModal.tsx\n/src/components/GlobeCanvas.tsx\n/src/components/InAppArticleReader.tsx\n/src/components/InAppPushBanner.tsx\n/src/components/NotificationCenterModal.tsx\n/src/components/PersonalizedFeedView.tsx\n/src/components/SavedArticlesView.tsx\n/src/components/TopNav.tsx\n/src/components/UserProfileModal.tsx\n/src/data/countries.ts\n/src/data/economicCalendar.ts\n/src/data/newsData.ts\n/src/hooks/usePWAInstall.ts\n/src/index.css\n/src/main.tsx\n/src/services/geminiService.ts\n/src/services/newsApi.ts\n/src/services/notificationService.ts\n/src/types/index.ts\n/src/utils/speech.ts\n/src/utils/storage.ts\n/tsconfig.json\n/vite.config.ts\n\nThe following dependencies are installed:\n@google/genai: ^2.4.0\n@tailwindcss/vite: ^4.3.3\n@vitejs/plugin-react: ^6.1.1\ncanvas-confetti: ^1.9.4\nd3: ^7.9.0\ndotenv: ^17.2.3\nexpress: ^4.21.2\nlucide-react: ^0.546.0\nmotion: ^12.23.24\nreact: ^19.0.1\nreact-dom: ^19.0.1\nrss-parser: ^3.13.0\ntopojson-client: ^3.1.0\nvite: ^8.3.0\nworld-atlas: ^2.0.2\n\nThe following devDependencies are installed:\n@types/canvas-confetti: ^1.9.0\n@types/d3: ^7.4.3\n@types/express: ^4.17.21\n@types/node: ^22.14.0\n@types/react: ^19.3.0\n@types/react-dom: ^19.3.0\n@types/topojson-client: ^3.1.5\nautoprefixer: ^10.4.21\nesbuild: ^0.25.0\ntailwindcss: ^4.3.3\ntsx: ^4.21.0\ntypescript: ^7.0.2\nvite-plugin-pwa: ^1.3.0\n\nKey file contents:\n\n--- /.env.example ---\n```\n# GEMINI_API_KEY: Required for Gemini AI API calls.\n# AI Studio automatically injects this at runtime from user secrets.\n# Users configure this via the Secrets panel in the AI Studio UI.\nGEMINI_API_KEY=\"MY_GEMINI_API_KEY\"\n\n# APP_URL: The URL where this applet is hosted.\n# AI Studio automatically injects this at runtime with the Cloud Run service URL.\n# Used for self-referential links, OAuth callbacks, and API endpoints.\nAPP_URL=\"MY_APP_URL\"\n\n# GNEWS_API_KEY: Optional API key for GNews.io live news integration\nGNEWS_API_KEY=\"\"\n\n# NEWS_API_KEY: Optional API key for NewsAPI.org live news integration\nNEWS_API_KEY=\"\"\n\n```\n\n--- /index.html ---\n```html\n<!doctype html>\n<html lang=\"id\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover\" />\n    <title>Globe Berita Dunia Mobile (APK)</title>\n    <meta name=\"description\" content=\"Aplikasi mobile interaktif berita dunia dengan visualisasi globe 3D, pembaca berita in-app tanpa keluar aplikasi, kalender ekonomi, dan instalasi PWA/APK.\" />\n    <meta property=\"og:title\" content=\"Globe Berita Dunia Mobile (APK)\" />\n    <meta property=\"og:description\" content=\"Aplikasi mobile interaktif berita dunia dengan visualisasi globe 3D, pembaca berita in-app tanpa keluar aplikasi, kalender ekonomi, dan instalasi PWA/APK.\" />\n    <meta property=\"og:type\" content=\"website\" />\n    <meta name=\"twitter:card\" content=\"summary_large_image\" />\n    \n    <!-- Mobile PWA & APK Standalone optimizations -->\n    <meta name=\"theme-color\" content=\"#03040c\" />\n    <meta name=\"mobile-web-app-capable\" content=\"yes\" />\n    <meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />\n    <meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\" />\n    <meta name=\"apple-mobile-web-app-title\" content=\"GlobeBerita\" />\n    <meta name=\"format-detection\" content=\"telephone=no\" />\n    \n    <!-- Icons -->\n    <link rel=\"icon\" type=\"image/svg+xml\" href=\"/icon.svg\" />\n    <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\" />\n    \n    <!-- Google Fonts for crisp typography -->\n    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\" />\n    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin />\n    <link href=\"https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap\" rel=\"stylesheet\" />\n  </head>\n  <body class=\"bg-[#02030a] text-slate-100 select-none antialiased overflow-hidden overscroll-none\">\n    <div id=\"root\"></div>\n    <script type=\"module\" src=\"/src/main.tsx\"></script>\n  </body>\n</html>\n\n```\n\n--- /metadata.json ---\n```json\n{\n  \"name\": \"Remix Globe Berita Dunia Mobile (APK)\",\n  \"description\": \"Aplikasi mobile interaktif berita dunia dengan visualisasi globe 3D, pembaca berita in-app tanpa keluar aplikasi, kalender ekonomi, dan instalasi PWA/APK.\",\n  \"requestFramePermissions\": [],\n  \"majorCapabilities\": [\n    \"MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API\"\n  ]\n}\n```\n\n--- /src/App.tsx ---\n```typescript\nimport React, { useState, useEffect, useMemo, useCallback } from \'react\';\nimport { GlobeCanvas } from \'./components/GlobeCanvas\';\nimport { TopNav } from \'./components/TopNav\';\nimport { BreakingNewsTicker } from \'./components/BreakingNewsTicker\';\nimport { CountryNewsSheet } from \'./components/CountryNewsSheet\';\nimport { InAppArticleReader } from \'./components/InAppArticleReader\';\nimport { EconomicCalendarView } from \'./components/EconomicCalendarView\';\nimport { SavedArticlesView } from \'./components/SavedArticlesView\';\nimport { CountryListView } from \'./components/CountryListView\';\nimport { APKInstallModal } from \'./components/APKInstallModal\';\nimport { UserProfileModal } from \'./components/UserProfileModal\';\nimport { NotificationCenterModal } from \'./components/NotificationCenterModal\';\nimport { PersonalizedFeedView } from \'./components/PersonalizedFeedView\';\nimport { InAppPushBanner } from \'./components/InAppPushBanner\';\nimport { CountryInfo, NewsArticle, UserProfile } from \'./types\';\nimport { getCountryInfo } from \'./data/countries\';\nimport { getNewsForCountry, CURATED_NEWS, FALLBACK_WORLD_NEWS } from \'./data/newsData\';\nimport { getUserProfile, getNotifications } from \'./utils/storage\';\nimport { notificationService } from \'./services/notificationService\';\nimport { fetchLiveNews } from \'./services/newsApi\';\n\nexport default function App() {\n  const [selectedCountry, setSelectedCountry] = useState<CountryInfo | null>(null);\n  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);\n  const [autoRotate, setAutoRotate] = useState<boolean>(true);\n  const [theme, setTheme] = useState<\'dark\' | \'light\'>(\'dark\');\n\n  // Modals & views\n  const [showEconomicCalendar, setShowEconomicCalendar] = useState<boolean>(false);\n  const [showSavedArticles, setShowSavedArticles] = useState<boolean>(false);\n  const [showCountryList, setShowCountryList] = useState<boolean>(false);\n  const [showAPKModal, setShowAPKModal] = useState<boolean>(false);\n  const [showProfileModal, setShowProfileModal] = useState<boolean>(false);\n  const [showNotificationsModal, setShowNotificationsModal] = useState<boolean>(false);\n  const [showForYouFeed, setShowForYouFeed] = useState<boolean>(false);\n\n  // User Profile\n  const [userProfile, setUserProfile] = useState<UserProfile>(getUserProfile);\n  const [unreadNotifCount, setUnreadNotifCount] = useState<number>(0);\n\n  // Live pool of articles\n  const [allArticles, setAllArticles] = useState<NewsArticle[]>(() => {\n    const list = Object.values(CURATED_NEWS).flat();\n    return [...list, ...FALLBACK_WORLD_NEWS];\n  });\n\n  // Sync theme\n  useEffect(() => {\n    document.documentElement.setAttribute(\'data-theme\', theme);\n  }, [theme]);\n\n  // Update unread notification count\n  const refreshUnreadCount = useCallback(() => {\n    const notifs = getNotifications();\n    const unread = notifs.filter((n) => !n.isRead).length;\n    setUnreadNotifCount(unread);\n  }, []);\n\n  useEffect(() => {\n    refreshUnreadCount();\n  }, [refreshUnreadCount, showNotificationsModal]);\n\n  // Load live news headlines initially in background\n  useEffect(() => {\n    fetchLiveNews({ q: \'dunia\' })\n      .then((live) => {\n        if (live && live.length > 0) {\n          setAllArticles((prev) => {\n            const existingIds = new Set(prev.map((a) => a.id));\n            const newOnes = live.filter((a) => !existingIds.has(a.id));\n            return [...newOnes, ...prev];\n          });\n        }\n      })\n      .catch((err) => {\n        console.warn(\'Initial live news load error:\', err);\n      });\n  }, []);\n\n  // Handle article tap from notifications\n  const handleOpenArticleById = useCallback(\n    (articleId: string) => {\n      const found = allArticles.find((a) => a.id === articleId);\n      if (found) {\n        setSelectedArticle(found);\n        return;\n      }\n      // If not in current list, search curated\n      const allCurated = Object.values(CURATED_NEWS).flat();\n      const match = allCurated.find((a) => a.id === articleId);\n      if (match) {\n        setSelectedArticle(match);\n      }\n    },\n    [allArticles]\n  );\n\n  useEffect(() => {\n    const unsub = notificationService.onNotificationTap((articleId) => {\n      handleOpenArticleById(articleId);\n      refreshUnreadCount();\n    });\n    return unsub;\n  }, [handleOpenArticleById, refreshUnreadCount]);\n\n  // Periodic push notification simulation for preferred topics / categories\n  useEffect(() => {\n    if (!userProfile.notificationsEnabled) return;\n\n    // Trigger initial notification after 8 seconds if never received\n    const initialTimer = setTimeout(() => {\n      const existing = getNotifications();\n      if (existing.length === 0) {\n        const pool = allArticles.filter((art) =>\n          userProfile.selectedCategories.some(\n            (c) => c.toLowerCase() === art.category.toLowerCase()\n          )\n        );\n        const pick = pool[0] || allArticles[0];\n        if (pick) {\n          notificationService.sendArticleNotification(pick, \'breaking\');\n          refreshUnreadCount();\n        }\n      }\n    }, 8000);\n\n    // Periodic check every 3 minutes\n    const interval = setInterval(() => {\n      if (!userProfile.notificationsEnabled) return;\n      const candidates = allArticles.filter((art) => art.isBreaking);\n      const pick = candidates[Math.floor(Math.random() * candidates.length)] || allArticles[0];\n      if (pick) {\n        notificationService.sendArticleNotification(pick, \'breaking\');\n        refreshUnreadCount();\n      }\n    }, 180000);\n\n    return () => {\n      clearTimeout(initialTimer);\n      clearInterval(interval);\n    };\n  }, [userProfile.notificationsEnabled, userProfile.selectedCategories, allArticles, refreshUnreadCount]);\n\n  // Keyboard navigation shortcuts for desktop\n  useEffect(() => {\n    const handleKeyDown = (e: KeyboardEvent) => {\n      // Don\'t intercept if user is typing in an input\n      if ([\'INPUT\', \'TEXTAREA\'].includes((e.target as HTMLElement)?.tagName)) {\n        return;\n      }\n\n      if (e.key === \'Escape\') {\n        setSelectedArticle(null);\n        setSelectedCountry(null);\n        setShowProfileModal(false);\n        setShowNotificationsModal(false);\n        setShowForYouFeed(false);\n        setShowEconomicCalendar(false);\n        setShowSavedArticles(false);\n        setShowCountryList(false);\n        setShowAPKModal(false);\n      } else if (e.code === \'Space\') {\n        e.preventDefault();\n        setAutoRotate((prev) => !prev);\n      } else if (e.key === \'p\' || e.key === \'P\') {\n        setShowProfileModal((prev) => !prev);\n      } else if (e.key === \'n\' || e.key === \'N\') {\n        setShowNotificationsModal((prev) => !prev);\n      } else if (e.key === \'f\' || e.key === \'F\') {\n        setShowForYouFeed((prev) => !prev);\n      } else if (e.key === \'t\' || e.key === \'T\') {\n        setTheme((prev) => (prev === \'dark\' ? \'light\' : \'dark\'));\n      }\n    };\n\n    window.addEventListener(\'keydown\', handleKeyDown);\n    return () => window.removeEventListener(\'keydown\', handleKeyDown);\n  }, []);\n\n  const handleSelectCountry = (country: CountryInfo | null) => {\n    setSelectedCountry(country);\n    if (country) {\n      setAutoRotate(false);\n    }\n  };\n\n  const handleSelectCountryByName = (name: string) => {\n    const country = getCountryInfo(name);\n    handleSelectCountry(country);\n  };\n\n  const handleOpenArticle = (article: NewsArticle) => {\n    setSelectedArticle(article);\n  };\n\n  const relatedArticles = useMemo(() => {\n    if (!selectedArticle) return [];\n    return getNewsForCountry(selectedArticle.countryName, selectedArticle.countryCode);\n  }, [selectedArticle]);\n\n... (truncated)\n```\n\n--- /src/index.css ---\n```css\n@import \"tailwindcss\";\n\n:root {\n  --safe-top: env(safe-area-inset-top, 0px);\n  --safe-bottom: env(safe-area-inset-bottom, 0px);\n  font-family: \'Plus Jakarta Sans\', -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;\n  -webkit-tap-highlight-color: transparent;\n}\n\n/* Custom styled sleek scrollbars */\n::-webkit-scrollbar {\n  width: 5px;\n  height: 5px;\n}\n::-webkit-scrollbar-track {\n  background: transparent;\n}\n::-webkit-scrollbar-thumb {\n  background: rgba(255, 255, 255, 0.16);\n  border-radius: 9999px;\n}\n::-webkit-scrollbar-thumb:hover {\n  background: rgba(255, 255, 255, 0.3);\n}\n\n@keyframes pulseGlow {\n  0%, 100% {\n    opacity: 0.9;\n    transform: scale(1);\n  }\n  50% {\n    opacity: 0.4;\n    transform: scale(0.97);\n  }\n}\n\n.animate-pulse-glow {\n  animation: pulseGlow 2.5s ease-in-out infinite;\n}\n\n```\n\n--- /src/main.tsx ---\n```typescript\nimport {StrictMode} from \'react\';\nimport {createRoot} from \'react-dom/client\';\nimport App from \'./App.tsx\';\nimport \'./index.css\';\n\ncreateRoot(document.getElementById(\'root\')!).render(\n  <StrictMode>\n    <App />\n  </StrictMode>,\n);\n\n```\n\n--- /tsconfig.json ---\n```json\n{\n  \"compilerOptions\": {\n    \"target\": \"ES2022\",\n    \"experimentalDecorators\": true,\n    \"useDefineForClassFields\": false,\n    \"module\": \"ESNext\",\n    \"types\": [\"vite/client\", \"vite-plugin-pwa/client\"],\n    \"lib\": [\n      \"ES2022\",\n      \"DOM\",\n      \"DOM.Iterable\"\n    ],\n    \"skipLibCheck\": true,\n    \"moduleResolution\": \"bundler\",\n    \"isolatedModules\": true,\n    \"moduleDetection\": \"force\",\n    \"allowJs\": true,\n    \"jsx\": \"react-jsx\",\n    \"paths\": {\n      \"@/*\": [\n        \"./*\"\n      ]\n    },\n    \"allowImportingTsExtensions\": true,\n    \"noEmit\": true\n  }\n}\n\n```\n\n--- /vite.config.ts ---\n```typescript\nimport tailwindcss from \'@tailwindcss/vite\';\nimport react from \'@vitejs/plugin-react\';\nimport path from \'path\';\nimport { fileURLToPath } from \'url\';\nimport { defineConfig } from \'vite\';\nimport { VitePWA } from \'vite-plugin-pwa\';\n\nconst __filename = fileURLToPath(import.meta.url);\nconst __dirname = path.dirname(__filename);\n\nexport default defineConfig(() => {\n  return {\n    plugins: [\n      react(),\n      tailwindcss(),\n      VitePWA({\n        registerType: \'autoUpdate\',\n        includeAssets: [\'favicon.ico\', \'apple-touch-icon.png\', \'icon.svg\'],\n        manifest: {\n          id: \'/\',\n          name: \'Globe Berita Dunia Mobile (APK)\',\n          short_name: \'GlobeBerita\',\n          description: \'Aplikasi mobile interaktif berita dunia dengan visualisasi globe 3D, pembaca berita in-app tanpa keluar aplikasi, kalender ekonomi, dan instalasi PWA/APK.\',\n          theme_color: \'#050816\',\n          background_color: \'#02030a\',\n          display: \'standalone\',\n          orientation: \'portrait-primary\',\n          start_url: \'/\',\n          scope: \'/\',\n          categories: [\'news\', \'magazines\', \'education\'],\n          icons: [\n            {\n              src: \'/pwa-192x192.png\',\n              sizes: \'192x192\',\n              type: \'image/png\',\n              purpose: \'any\',\n            },\n            {\n              src: \'/pwa-512x512.png\',\n              sizes: \'512x512\',\n              type: \'image/png\',\n              purpose: \'any\',\n            },\n            {\n              src: \'/pwa-maskable-512x512.png\',\n              sizes: \'512x512\',\n              type: \'image/png\',\n              purpose: \'maskable\',\n            },\n          ],\n        },\n        workbox: {\n          globPatterns: [\'**/*.{js,css,html,ico,png,svg,woff,woff2,json}\'],\n        },\n        devOptions: {\n          enabled: false,\n        },\n      }),\n    ],\n    resolve: {\n      alias: {\n        \'@\': path.resolve(__dirname, \'.\'),\n      },\n    },\n    server: {\n      port: 3000,\n      host: \'0.0.0.0\',\n      hmr: process.env.DISABLE_HMR !== \'true\',\n      watch: process.env.DISABLE_HMR === \'true\' ? null : {},\n    },\n  };\n});\n\n```"
+    }
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_USER_INPUT
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790433697
+      nanos: 186900000
+    }
+    completed_at {
+      seconds: 1790433697
+      nanos: 186900000
+    }
+  }
+  user_input {
+    items {
+      text: "Remixed \"Globe Berita Dunia Mobile (APK)\""
+    }
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_USER_INPUT
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434788
+      nanos: 152407961
+    }
+    source: CORTEX_STEP_SOURCE_USER_EXPLICIT
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 2
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+  }
+  user_input {
+    user_response: "add this"
+    items {
+      item {
+        text_block {
+          content: "---\ntype: \"feature\"\ntitle: \"Add a Gemini chatbot\"\nicon: \"voice_chat\"\n---\n\nYou MUST add a multi-turn chat interface to the app using Gemini. The chat must maintain conversation history, display messages in a scrollable thread, and include a system instruction to give the chatbots specific roles. Use gemini-3.1-pro-preview for particularly complex tasks, gemini-3.5-flash for general tasks, and gemini-3.1-flash-lite for tasks that should happen fast."
+        }
+      }
+    }
+    items {
+      text: "add this"
+    }
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_PLANNER_RESPONSE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434788
+      nanos: 153062701
+    }
+    source: CORTEX_STEP_SOURCE_MODEL
+    viewable_at {
+      seconds: 1790434788
+      nanos: 216352162
+    }
+    finished_generating_at {
+      seconds: 1790434788
+      nanos: 216351792
+    }
+    completed_at {
+      seconds: 1790434788
+      nanos: 216351792
+    }
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 3
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+    started_at {
+      seconds: 1790434788
+      nanos: 216351792
+    }
+  }
+  planner_response {
+    stop_reason: STOP_REASON_CLIENT_STREAM_ERROR
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_ERROR_MESSAGE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434792
+      nanos: 217602351
+    }
+    source: CORTEX_STEP_SOURCE_SYSTEM
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 4
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+  }
+  error_message {
+    error {
+      user_error_message: "Encountered retryable error from model provider: Agent execution terminated due to error."
+      short_error: "generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash: generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash"
+      error_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc-4"
+      error_code: 8
+    }
+    should_show_model: true
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_PLANNER_RESPONSE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434792
+      nanos: 217909311
+    }
+    source: CORTEX_STEP_SOURCE_MODEL
+    viewable_at {
+      seconds: 1790434792
+      nanos: 280527523
+    }
+    finished_generating_at {
+      seconds: 1790434792
+      nanos: 280527183
+    }
+    completed_at {
+      seconds: 1790434792
+      nanos: 280527183
+    }
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 5
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+    started_at {
+      seconds: 1790434792
+      nanos: 280527183
+    }
+  }
+  planner_response {
+    stop_reason: STOP_REASON_CLIENT_STREAM_ERROR
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_ERROR_MESSAGE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434797
+      nanos: 288777881
+    }
+    source: CORTEX_STEP_SOURCE_SYSTEM
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 6
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+  }
+  error_message {
+    error {
+      user_error_message: "Encountered retryable error from model provider: Agent execution terminated due to error."
+      short_error: "generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash: generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash"
+      error_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc-6"
+      error_code: 8
+    }
+    should_show_model: true
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_PLANNER_RESPONSE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434797
+      nanos: 289095371
+    }
+    source: CORTEX_STEP_SOURCE_MODEL
+    viewable_at {
+      seconds: 1790434797
+      nanos: 327843347
+    }
+    finished_generating_at {
+      seconds: 1790434797
+      nanos: 327842907
+    }
+    completed_at {
+      seconds: 1790434797
+      nanos: 327842907
+    }
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 7
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+    started_at {
+      seconds: 1790434797
+      nanos: 327842907
+    }
+  }
+  planner_response {
+    stop_reason: STOP_REASON_CLIENT_STREAM_ERROR
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_ERROR_MESSAGE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434810
+      nanos: 303019597
+    }
+    source: CORTEX_STEP_SOURCE_SYSTEM
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 8
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+  }
+  error_message {
+    error {
+      user_error_message: "Encountered retryable error from model provider: Agent execution terminated due to error."
+      short_error: "generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash: generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash"
+      error_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc-8"
+      error_code: 8
+    }
+    should_show_model: true
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_PLANNER_RESPONSE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434810
+      nanos: 303455097
+    }
+    source: CORTEX_STEP_SOURCE_MODEL
+    viewable_at {
+      seconds: 1790434810
+      nanos: 345368716
+    }
+    finished_generating_at {
+      seconds: 1790434810
+      nanos: 345368156
+    }
+    completed_at {
+      seconds: 1790434810
+      nanos: 345368156
+    }
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 9
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+    started_at {
+      seconds: 1790434810
+      nanos: 345368156
+    }
+  }
+  planner_response {
+    stop_reason: STOP_REASON_CLIENT_STREAM_ERROR
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_ERROR_MESSAGE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434841
+      nanos: 9613377
+    }
+    source: CORTEX_STEP_SOURCE_SYSTEM
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 10
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+  }
+  error_message {
+    error {
+      user_error_message: "Encountered retryable error from model provider: Agent execution terminated due to error."
+      short_error: "generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash: generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash"
+      error_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc-10"
+      error_code: 8
+    }
+    should_show_model: true
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_PLANNER_RESPONSE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434841
+      nanos: 10012177
+    }
+    source: CORTEX_STEP_SOURCE_MODEL
+    viewable_at {
+      seconds: 1790434841
+      nanos: 46862773
+    }
+    finished_generating_at {
+      seconds: 1790434841
+      nanos: 46862383
+    }
+    completed_at {
+      seconds: 1790434841
+      nanos: 46862383
+    }
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 11
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+    started_at {
+      seconds: 1790434841
+      nanos: 46862383
+    }
+  }
+  planner_response {
+    stop_reason: STOP_REASON_CLIENT_STREAM_ERROR
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_ERROR_MESSAGE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434901
+      nanos: 262548719
+    }
+    source: CORTEX_STEP_SOURCE_SYSTEM
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 12
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+  }
+  error_message {
+    error {
+      user_error_message: "Encountered retryable error from model provider: Agent execution terminated due to error."
+      short_error: "generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash: generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash"
+      error_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc-12"
+      error_code: 8
+    }
+    should_show_model: true
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_PLANNER_RESPONSE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434901
+      nanos: 263064239
+    }
+    source: CORTEX_STEP_SOURCE_MODEL
+    viewable_at {
+      seconds: 1790434901
+      nanos: 334897274
+    }
+    finished_generating_at {
+      seconds: 1790434901
+      nanos: 334896844
+    }
+    completed_at {
+      seconds: 1790434901
+      nanos: 334896844
+    }
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 13
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+    started_at {
+      seconds: 1790434901
+      nanos: 334896844
+    }
+  }
+  planner_response {
+    stop_reason: STOP_REASON_CLIENT_STREAM_ERROR
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_ERROR_MESSAGE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434996
+      nanos: 967050107
+    }
+    source: CORTEX_STEP_SOURCE_SYSTEM
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 14
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+  }
+  error_message {
+    error {
+      user_error_message: "Encountered retryable error from model provider: Agent execution terminated due to error."
+      short_error: "generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash: generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash"
+      error_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc-14"
+      error_code: 8
+    }
+    should_show_model: true
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_PLANNER_RESPONSE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790434996
+      nanos: 967496057
+    }
+    source: CORTEX_STEP_SOURCE_MODEL
+    viewable_at {
+      seconds: 1790434997
+      nanos: 31821652
+    }
+    finished_generating_at {
+      seconds: 1790434997
+      nanos: 31821232
+    }
+    completed_at {
+      seconds: 1790434997
+      nanos: 31821232
+    }
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 15
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+    started_at {
+      seconds: 1790434997
+      nanos: 31821232
+    }
+  }
+  planner_response {
+    stop_reason: STOP_REASON_CLIENT_STREAM_ERROR
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_ERROR_MESSAGE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790435188
+      nanos: 209706029
+    }
+    source: CORTEX_STEP_SOURCE_SYSTEM
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 16
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+  }
+  error_message {
+    error {
+      user_error_message: "Encountered retryable error from model provider: Agent execution terminated due to error."
+      short_error: "generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash: generic::resource_exhausted: You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_tokens_per_model_per_user, limit: 25000000, model: gemini-3.8-flash"
+      error_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc-16"
+      error_code: 8
+    }
+    should_show_model: true
+  }
+}
+steps {
+  type: CORTEX_STEP_TYPE_PLANNER_RESPONSE
+  status: CORTEX_STEP_STATUS_DONE
+  metadata {
+    created_at {
+      seconds: 1790435188
+      nanos: 210320389
+    }
+    source: CORTEX_STEP_SOURCE_MODEL
+    viewable_at {
+      seconds: 1790435188
+      nanos: 280417630
+    }
+    finished_generating_at {
+      seconds: 1790435188
+      nanos: 280416810
+    }
+    completed_at {
+      seconds: 1790435188
+      nanos: 280416810
+    }
+    generator_model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    execution_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    requested_model {
+      model: MODEL_GOOGLE_GEMINI_INTERNAL_BYOM
+    }
+    source_trajectory_step_info {
+      trajectory_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+      step_index: 17
+      cascade_id: "c2e9be9a-e799-462d-b0a4-93b3894e26bc"
+    }
+    step_generation_version: 1
+    model_info {
+      model_name: "gemini-3.8-flash"
+      thinking_budget: 4000
+    }
+    started_at {
+      seconds: 1790435188
+      nanos: 280416810
+    }
+  }
+  planner_response {
+    stop_reason: STOP_REASON_CLIENT_STREAM_ERROR
+  }
+}
