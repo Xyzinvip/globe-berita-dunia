@@ -526,6 +526,21 @@ export const COUNTRIES_DATA: Record<string, CountryInfo> = {
     languages: 'Inggris, Māori',
     gdp: '$253 Miliar',
   },
+  'Yemen': {
+    id: '887',
+    name: 'Yemen',
+    nameId: 'Yaman',
+    flag: '🇾🇪',
+    code: 'YE',
+    capital: "Sana'a",
+    continent: 'Timur Tengah',
+    population: '33.7 Juta',
+    currency: 'YER (Rial Yaman)',
+    timezone: 'UTC+3',
+    center: [48.51, 15.55],
+    languages: 'Arab',
+    gdp: '$21 Miliar',
+  },
 };
 
 // Generic flag mapper fallback
@@ -539,31 +554,63 @@ export function getCountryFlag(name: string): string {
     'Kenya': '🇰🇪', 'Morocco': '🇲🇦', 'Nigeria': '🇳🇬', 'Norway': '🇳🇴',
     'Pakistan': '🇵🇰', 'Peru': '🇵🇪', 'Poland': '🇵🇱', 'Portugal': '🇵🇹',
     'Qatar': '🇶🇦', 'Romania': '🇷🇴', 'Sweden': '🇸🇪', 'Venezuela': '🇻🇪',
+    'Yemen': '🇾🇪',
   };
   return map[name] || '🌍';
 }
 
-export function getCountryInfo(name: string, id?: string): CountryInfo {
-  if (COUNTRIES_DATA[name]) return COUNTRIES_DATA[name];
+export function getCountryInfo(
+  name: string,
+  id?: string,
+  customCenter?: [number, number]
+): CountryInfo {
+  if (COUNTRIES_DATA[name]) {
+    const base = COUNTRIES_DATA[name];
+    if (customCenter && isFinite(customCenter[0]) && isFinite(customCenter[1])) {
+      return { ...base, center: customCenter };
+    }
+    return base;
+  }
 
   // Try finding by id or case-insensitive name
   const byName = Object.values(COUNTRIES_DATA).find(
     (c) => c.name.toLowerCase() === name.toLowerCase() || c.nameId.toLowerCase() === name.toLowerCase()
   );
-  if (byName) return byName;
+  if (byName) {
+    if (customCenter && isFinite(customCenter[0]) && isFinite(customCenter[1])) {
+      return { ...byName, center: customCenter };
+    }
+    return byName;
+  }
 
-  // Fallback dynamic info
+  // Dynamic localization with Native Intl.DisplayNames
+  let localizedName = name;
+  let countryCode = name.slice(0, 2).toUpperCase();
+  try {
+    const regionNames = new Intl.DisplayNames(['id'], { type: 'region' });
+    const match = regionNames.of(countryCode);
+    if (match) localizedName = match;
+  } catch {
+    // fallback
+  }
+
+  // Fallback dynamic info with real centroid if available
+  const centerCoords: [number, number] =
+    customCenter && isFinite(customCenter[0]) && isFinite(customCenter[1])
+      ? customCenter
+      : [0, 20];
+
   return {
     id: id || '000',
     name: name,
-    nameId: name,
+    nameId: localizedName,
     flag: getCountryFlag(name),
-    code: name.slice(0, 2).toUpperCase(),
-    capital: 'Ibukota ' + name,
+    code: countryCode,
+    capital: 'Pusat Wilayah ' + localizedName,
     continent: 'Global',
     population: 'Populasi Global',
     currency: 'Mata Uang Nasional',
     timezone: 'Waktu Lokal',
-    center: [0, 20],
+    center: centerCoords,
   };
 }
