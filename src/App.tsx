@@ -12,6 +12,7 @@ import { NotificationCenterModal } from './components/NotificationCenterModal';
 import { PersonalizedFeedView } from './components/PersonalizedFeedView';
 import { InAppPushBanner } from './components/InAppPushBanner';
 import { GeminiChatModal } from './components/GeminiChatModal';
+import { AIAssistantWidget } from './components/AIAssistantWidget';
 import { Bot, Sparkles } from 'lucide-react';
 import { CountryInfo, NewsArticle, UserProfile } from './types';
 import { getCountryInfo } from './data/countries';
@@ -246,54 +247,40 @@ export default function App() {
         </div>
       )}
 
-      {/* Desktop Helper Bar at Bottom Left */}
-      <div className="hidden lg:flex fixed bottom-5 left-6 z-20 items-center gap-3 px-3.5 py-2 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-800 text-xs text-slate-400 pointer-events-auto">
-        <span>Pintasan Desktop:</span>
-        <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] text-cyan-300">
+      {/* Desktop Helper Bar at Bottom Left (Sci-Fi Glassmorphism) */}
+      <div className="hidden lg:flex fixed bottom-5 left-6 z-20 items-center gap-3 px-4 py-2.5 rounded-2xl bg-[#0a0e17]/80 backdrop-blur-xl border border-cyan-500/25 text-xs text-slate-300 shadow-[0_0_15px_rgba(0,243,255,0.08)] pointer-events-auto">
+        <span className="font-semibold text-cyan-400">Pintasan:</span>
+        <kbd className="px-1.5 py-0.5 rounded bg-slate-800/90 border border-cyan-500/30 font-mono text-[11px] text-cyan-300 shadow-sm">
           Spasi
         </kbd>
         <span>Putar</span>
-        <span aria-hidden="true">·</span>
-        <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] text-cyan-400">
+        <span aria-hidden="true" className="text-slate-600">·</span>
+        <kbd className="px-1.5 py-0.5 rounded bg-slate-800/90 border border-cyan-500/30 font-mono text-[11px] text-cyan-400 shadow-sm">
           C
         </kbd>
         <span>Tanya AI</span>
-        <span aria-hidden="true">·</span>
-        <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] text-orange-300">
+        <span aria-hidden="true" className="text-slate-600">·</span>
+        <kbd className="px-1.5 py-0.5 rounded bg-slate-800/90 border border-orange-500/30 font-mono text-[11px] text-orange-300 shadow-sm">
           P
         </kbd>
         <span>Profil</span>
-        <span aria-hidden="true">·</span>
-        <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] text-amber-300">
+        <span aria-hidden="true" className="text-slate-600">·</span>
+        <kbd className="px-1.5 py-0.5 rounded bg-slate-800/90 border border-amber-500/30 font-mono text-[11px] text-amber-300 shadow-sm">
           N
         </kbd>
         <span>Notif</span>
-        <span aria-hidden="true">·</span>
-        <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[11px] text-slate-300">
+        <span aria-hidden="true" className="text-slate-600">·</span>
+        <kbd className="px-1.5 py-0.5 rounded bg-slate-800/90 border border-slate-700 font-mono text-[11px] text-slate-300 shadow-sm">
           Esc
         </kbd>
         <span>Tutup</span>
       </div>
 
-      {/* Floating Gemini AI Quick Launcher */}
-      <button
-        type="button"
-        onClick={() => setShowGeminiChat(true)}
-        className="fixed bottom-6 right-5 sm:bottom-7 sm:right-7 z-30 flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 text-white font-bold text-xs sm:text-sm shadow-xl shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-105 active:scale-95 transition-all duration-200 border border-cyan-300/40 pointer-events-auto"
-        title="Tanya Analis Berita Global AI (Gemini 3.1 & 3.5 - Tombol C)"
-        aria-label="Tanya AI Gemini"
-      >
-        <div className="relative">
-          <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-slate-950" />
-          <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-        </div>
-        <span className="tracking-wide">Tanya AI</span>
-        {selectedCountry && (
-          <span className="text-[10px] bg-black/30 px-1.5 py-0.5 rounded-full border border-white/20 hidden sm:inline">
-            {selectedCountry.flag} {selectedCountry.nameId}
-          </span>
-        )}
-      </button>
+      {/* Draggable Holographic Chibi AI Assistant Widget */}
+      <AIAssistantWidget
+        onOpenAIChat={() => setShowGeminiChat(true)}
+        selectedCountry={selectedCountry}
+      />
 
       {/* Country News Bottom Sheet Drawer (Docks to Right on Desktop) */}
       <CountryNewsSheet
