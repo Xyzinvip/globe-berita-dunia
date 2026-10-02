@@ -1,4 +1,5 @@
 import { NewsArticle, BreakingAlert } from '../types';
+import { getArticleThumbnail } from '../services/newsImageEngine';
 
 export const BREAKING_ALERTS: BreakingAlert[] = [
   {
@@ -369,18 +370,115 @@ export const CURATED_NEWS: Record<string, NewsArticle[]> = {
       ],
     },
   ],
+  'Yemen': [
+    {
+      id: 'ye-1',
+      countryName: 'Yemen',
+      countryCode: 'YE',
+      title: 'Perkembangan Situasi Koridor Maritim Bab el-Mandeb dan Upaya Mediasi Stabilitas Kawasan',
+      titleEn: 'Developments in Bab el-Mandeb Maritime Corridor and Regional Stability Mediation',
+      summary: 'Pemantau maritim internasional melaporkan koordinasi keamanan jalur pelayaran komersial serta langkah negosiasi diplomatik untuk meredakan ketegangan di pesisir Laut Merah.',
+      summaryEn: 'International maritime monitors report commercial shipping security coordination and diplomatic negotiations to ease coastal tensions.',
+      category: 'Pertahanan',
+      source: 'Al Jazeera / Reuters',
+      publishedAt: '24 menit lalu',
+      readTimeMinutes: 4,
+      author: 'Tariq Al-Hamad',
+      imageUrl: 'https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=1000&q=80',
+      sentiment: 'urgent',
+      isBreaking: true,
+      keyTakeaways: [
+        'Satuan pengawal pelayaran internasional terus memonitor keamanan kapal niaga di Selat Bab el-Mandeb.',
+        'Utusan khusus PBB mendorong pembicaraan damai komprehensif demi perlindungan warga sipil.',
+        'Rantai pasok logistik laut global menyesuaikan rute alternatif sembari menunggu kepastian koridor aman.',
+      ],
+      fullContent: [
+        'SANAA/ADEN — Dinamika keamanan di sekitar perairan Yaman dan Selat Bab el-Mandeb terus menjadi fokus perhatian komunitas internasional.',
+        'Pihak-pihak terkait dilaporkan terlibat dalam dialog tidak langsung yang dimediasi oleh mitra regional guna mencegah eskalasi konflik berkepanjangan.',
+        'Badan kemanusiaan internasional menyerukan jaminan akses terbuka bagi kapal pembawa logistik gandum dan bantuan medis untuk penduduk setempat.',
+      ],
+    },
+    {
+      id: 'ye-2',
+      countryName: 'Yemen',
+      countryCode: 'YE',
+      title: 'PBB Salurkan Bantuan Kemanusiaan dan Program Ketahanan Pangan Darurat untuk Penduduk Rentan',
+      titleEn: 'UN Delivers Humanitarian Aid and Emergency Food Resilience Program',
+      summary: 'Badan Pangan Dunia (WFP) bersama organisasi kemanusiaan lokal memperluas jangkauan distribusi bahan pangan dan sanitasi air bersih di berbagai provinsi Yaman.',
+      summaryEn: 'WFP and local humanitarian groups expand food and clean water sanitation coverage across Yemeni governorates.',
+      category: 'Dunia',
+      source: 'UN News Global',
+      publishedAt: '2 jam lalu',
+      readTimeMinutes: 3,
+      author: 'Fatima Zahra',
+      imageUrl: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1000&q=80',
+      sentiment: 'neutral',
+      keyTakeaways: [
+        'Penyaluran bantuan mencakup paket gizi bagi lebih dari 2 juta keluarga rentan.',
+        'Program rehabilitasi sumur air bertenaga surya mulai beroperasi di area pedesaan.',
+        'Donor internasional berkomitmen memperkuat pendanaan pemulihan fasilitas kesehatan.',
+      ],
+      fullContent: [
+        'Program bantuan pangan darurat terus dipacu demi meringankan beban ekonomi masyarakat terdampak krisis berkepanjangan.',
+        'Perwakilan PBB mengapresiasi relawan lokal yang gigih mengantarkan perbekalan ke wilayah terpencil dengan medan berbukit.',
+      ],
+    },
+    {
+      id: 'ye-3',
+      countryName: 'Yemen',
+      countryCode: 'YE',
+      title: 'Inisiatif Pemulihan Pasar Komoditas Kopi Kuno Mokha Dorong Harapan Ekonomi Petani Lokal',
+      titleEn: 'Heritage Mokha Coffee Revival Initiative Boosts Local Farmer Livelihoods',
+      summary: 'Petani kopi tradisional di pegunungan Yaman kembali menghidupkan ekspor biji kopi legendaris Mokha dengan dukungan koperasi dan pembeli kopi spesial global.',
+      summaryEn: 'Traditional highland coffee farmers revive legendary Mokha bean exports with cooperative and specialty buyer support.',
+      category: 'Ekonomi',
+      source: 'Middle East Eye',
+      publishedAt: '5 jam lalu',
+      readTimeMinutes: 3,
+      author: 'Mansoor Al-Huraibi',
+      imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=1000&q=80',
+      sentiment: 'positive',
+      keyTakeaways: [
+        'Kopi varietas asli Mokha berhasil menembus pasar premium di Eropa dan Asia Timur.',
+        'Sistem irigasi tetes tradisional direstorasi untuk menghemat sumber air langka.',
+        'Pemberdayaan generasi muda tani membawa harapan kemandirian ekonomi baru.',
+      ],
+      fullContent: [
+        'Biji kopi Mokha yang memiliki sejarah panjang sebagai salah satu komoditas tertua dunia kini menemukan kembali pamornya di panggung internasional.',
+        'Upaya revitalisasi ini menjadi bukti ketahanan dan semangat warga Yaman dalam membangun kehidupan ekonomi yang bermartabat di tengah tantangan zaman.',
+      ],
+    },
+  ],
 };
 
 // Generates contextual, rich, realistic news articles for any country on the globe
 export function getNewsForCountry(countryName: string, countryCode: string = 'GL'): NewsArticle[] {
   if (CURATED_NEWS[countryName] && CURATED_NEWS[countryName].length > 0) {
-    return CURATED_NEWS[countryName];
+    return CURATED_NEWS[countryName].map((art) => ({
+      ...art,
+      imageUrl: getArticleThumbnail(art)
+    }));
+  }
+
+  const lower = countryName.toLowerCase();
+  for (const [key, articles] of Object.entries(CURATED_NEWS)) {
+    if (key.toLowerCase() === lower && articles.length > 0) {
+      return articles.map((art) => ({
+        ...art,
+        imageUrl: getArticleThumbnail(art)
+      }));
+    }
+  }
+
+  if (lower === 'yaman' || lower === 'yemen' || lower.includes('yemen') || lower.includes('yaman')) {
+    return (CURATED_NEWS['Yemen'] || []).map((art) => ({
+      ...art,
+      imageUrl: getArticleThumbnail(art)
+    }));
   }
 
   // Dynamic contextual generation for ANY world country
-  const categories: NewsArticle['category'][] = ['Ekonomi', 'Politik', 'Teknologi', 'Sains', 'Iklim', 'Dunia'];
-  
-  return [
+  const rawList: NewsArticle[] = [
     {
       id: `${countryName.toLowerCase().replace(/\s+/g, '-')}-1`,
       countryName,
@@ -394,7 +492,7 @@ export function getNewsForCountry(countryName: string, countryCode: string = 'GL
       publishedAt: '22 menit lalu',
       readTimeMinutes: 3,
       author: 'Koresponden Internasional',
-      imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80',
+      imageUrl: '',
       sentiment: 'positive',
       keyTakeaways: [
         `Pertumbuhan indikator makroekonomi ${countryName} menunjukkan tren pemulihan stabil.`,
@@ -416,12 +514,12 @@ export function getNewsForCountry(countryName: string, countryCode: string = 'GL
       titleEn: `${countryName} Hosts Green Energy Transition and Biodiversity Conservation Summit`,
       summary: `Para ilmuwan, pembuat kebijakan, dan aktivis berkumpul di ${countryName} guna menyusun peta jalan dekarbonisasi industri dan perlindungan cagar alam nasional.`,
       summaryEn: `Scientists and policymakers convene in ${countryName} to map out industrial decarbonization and nature preservation roadmaps.`,
-      category: 'Iklim',
+      category: 'Energi',
       source: 'Reuters Environment',
       publishedAt: '1 jam lalu',
       readTimeMinutes: 4,
       author: 'Tim Liputan Lingkungan',
-      imageUrl: 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&w=1000&q=80',
+      imageUrl: '',
       sentiment: 'positive',
       keyTakeaways: [
         `Target penurunan emisi karbon ${countryName} diperbarui sejalan dengan perjanjian Paris.`,
@@ -446,7 +544,7 @@ export function getNewsForCountry(countryName: string, countryCode: string = 'GL
       publishedAt: '4 jam lalu',
       readTimeMinutes: 3,
       author: 'Maya Lin',
-      imageUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1000&q=80',
+      imageUrl: '',
       sentiment: 'neutral',
       keyTakeaways: [
         `Akses internet pita lebar telah menjangkau lebih dari 88% wilayah ${countryName}.`,
@@ -458,6 +556,11 @@ export function getNewsForCountry(countryName: string, countryCode: string = 'GL
       ],
     },
   ];
+
+  return rawList.map((art) => ({
+    ...art,
+    imageUrl: getArticleThumbnail(art)
+  }));
 }
 
 export const FALLBACK_WORLD_NEWS: NewsArticle[] = [
