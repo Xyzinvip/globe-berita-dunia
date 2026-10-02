@@ -7,7 +7,6 @@ import { InAppArticleReader } from './components/InAppArticleReader';
 import { EconomicCalendarView } from './components/EconomicCalendarView';
 import { SavedArticlesView } from './components/SavedArticlesView';
 import { CountryListView } from './components/CountryListView';
-import { APKInstallModal } from './components/APKInstallModal';
 import { UserProfileModal } from './components/UserProfileModal';
 import { NotificationCenterModal } from './components/NotificationCenterModal';
 import { PersonalizedFeedView } from './components/PersonalizedFeedView';
@@ -32,7 +31,6 @@ export default function App() {
   const [showEconomicCalendar, setShowEconomicCalendar] = useState<boolean>(false);
   const [showSavedArticles, setShowSavedArticles] = useState<boolean>(false);
   const [showCountryList, setShowCountryList] = useState<boolean>(false);
-  const [showAPKModal, setShowAPKModal] = useState<boolean>(false);
   const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState<boolean>(false);
   const [showForYouFeed, setShowForYouFeed] = useState<boolean>(false);
@@ -162,7 +160,6 @@ export default function App() {
         setShowEconomicCalendar(false);
         setShowSavedArticles(false);
         setShowCountryList(false);
-        setShowAPKModal(false);
       } else if (e.code === 'Space') {
         e.preventDefault();
         setAutoRotate((prev) => !prev);
@@ -230,7 +227,6 @@ export default function App() {
         onOpenEconomicCalendar={() => setShowEconomicCalendar(true)}
         onOpenSavedArticles={() => setShowSavedArticles(true)}
         onOpenCountryList={() => setShowCountryList(true)}
-        onOpenAPKModal={() => setShowAPKModal(true)}
         onOpenProfile={() => setShowProfileModal(true)}
         onOpenNotifications={() => {
           setShowNotificationsModal(true);
@@ -389,9 +385,6 @@ export default function App() {
         activeCountry={selectedCountry}
         activeArticle={selectedArticle}
       />
-
-      {/* APK / PWA Mobile Installation Modal */}
-      <APKInstallModal isOpen={showAPKModal} onClose={() => setShowAPKModal(false)} />
     </div>
   );
 }
