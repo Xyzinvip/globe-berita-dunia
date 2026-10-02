@@ -18,6 +18,7 @@ import confetti from 'canvas-confetti';
 import { NewsArticle } from '../types';
 import { NewsSpeechReader } from '../utils/speech';
 import { isBookmarked, saveBookmark, removeBookmark, incrementReadCount } from '../utils/storage';
+import { getArticleThumbnail, getCategoryFallbackImage } from '../services/newsImageEngine';
 
 interface InAppArticleReaderProps {
   article: NewsArticle | null;
@@ -252,21 +253,22 @@ export const InAppArticleReader: React.FC<InAppArticleReaderProps> = ({
         </div>
 
         {/* Hero Image */}
-        {article.imageUrl && (
-          <div className="relative mb-6 rounded-2xl overflow-hidden border border-slate-800 shadow-xl bg-slate-900">
-            <img
-              src={article.imageUrl}
-              alt={currentTitle}
-              className="w-full aspect-video object-cover"
-              loading="lazy"
-            />
-            {article.author && (
-              <div className="absolute bottom-2 right-2 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[11px] text-slate-300">
-                Oleh: {article.author}
-              </div>
-            )}
-          </div>
-        )}
+        <div className="relative mb-6 rounded-2xl overflow-hidden border border-slate-800 shadow-xl bg-slate-900">
+          <img
+            src={getArticleThumbnail(article)}
+            alt={currentTitle}
+            onError={(e) => {
+              e.currentTarget.src = getCategoryFallbackImage(article.category);
+            }}
+            className="w-full aspect-video object-cover"
+            loading="lazy"
+          />
+          {article.author && (
+            <div className="absolute bottom-2 right-2 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[11px] text-slate-300">
+              Oleh: {article.author}
+            </div>
+          )}
+        </div>
 
         {/* Key Takeaways Card */}
         {article.keyTakeaways && article.keyTakeaways.length > 0 && (
@@ -368,8 +370,11 @@ export const InAppArticleReader: React.FC<InAppArticleReaderProps> = ({
                     className="p-3 rounded-2xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer active:scale-98 transition flex gap-3 items-center"
                   >
                     <img
-                      src={rel.imageUrl}
+                      src={getArticleThumbnail(rel)}
                       alt={rel.title}
+                      onError={(e) => {
+                        e.currentTarget.src = getCategoryFallbackImage(rel.category);
+                      }}
                       className="w-16 h-16 rounded-xl object-cover flex-none bg-slate-800"
                     />
                     <div className="flex-1 min-w-0">
