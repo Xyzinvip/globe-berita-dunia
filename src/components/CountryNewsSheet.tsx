@@ -17,6 +17,7 @@ import { CountryInfo, NewsArticle, NewsCategory } from '../types';
 import { getNewsForCountry } from '../data/newsData';
 import { getEconomicEventsForCountry } from '../data/economicCalendar';
 import { fetchLiveNews } from '../services/newsApi';
+import { sortArticlesChronological, isLatestArticle } from '../utils/dateHelper';
 
 interface CountryNewsSheetProps {
   country: CountryInfo | null;
@@ -69,7 +70,7 @@ export const CountryNewsSheet: React.FC<CountryNewsSheetProps> = ({
   }, [country]);
 
   const filteredArticles = useMemo(() => {
-    return liveArticles.filter((art) => {
+    const list = liveArticles.filter((art) => {
       const matchCategory = selectedCategory === 'Semua' || art.category === selectedCategory;
       const matchSearch =
         !searchQuery ||
@@ -77,6 +78,8 @@ export const CountryNewsSheet: React.FC<CountryNewsSheetProps> = ({
         art.summary.toLowerCase().includes(searchQuery.toLowerCase());
       return matchCategory && matchSearch;
     });
+    // Strict Reverse-Chronological Order (newest timestamp at index 0)
+    return sortArticlesChronological(list);
   }, [liveArticles, selectedCategory, searchQuery]);
 
   if (!country) return null;
@@ -96,7 +99,7 @@ export const CountryNewsSheet: React.FC<CountryNewsSheetProps> = ({
       className="fixed inset-x-0 bottom-0 lg:inset-x-auto lg:right-6 lg:bottom-6 lg:top-24 z-40 max-w-xl lg:max-w-md w-full mx-auto transition-transform duration-300 ease-out"
       aria-label={`Berita ${country.nameId}`}
     >
-      <div className="bg-[#070d1e]/95 backdrop-blur-2xl border-t border-x lg:border border-cyan-500/30 rounded-t-[28px] lg:rounded-[28px] shadow-2xl flex flex-col h-[78vh] lg:h-full pb-[calc(env(safe-area-inset-bottom,0px)+12px)] overflow-hidden">
+      <div className="bg-[#070d1e]/90 backdrop-blur-2xl border-t border-x lg:border border-cyan-500/35 rounded-t-[28px] lg:rounded-[28px] shadow-[0_0_35px_rgba(0,243,255,0.15)] flex flex-col h-[78vh] lg:h-full pb-[calc(env(safe-area-inset-bottom,0px)+12px)] overflow-hidden">
         {/* Drag handle on mobile */}
         <div className="w-10 h-1 rounded-full bg-slate-700/80 mx-auto mt-2.5 mb-1.5 flex-none lg:hidden" />
 
@@ -213,16 +216,16 @@ export const CountryNewsSheet: React.FC<CountryNewsSheetProps> = ({
         {/* Tab 1: News Feed */}
         {activeTab === 'news' && (
           <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3">
-            {/* Category Filter Chips */}
+            {/* Category Filter Chips (Micro-interaction & Sci-Fi Glassmorphism) */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition active:scale-95 ${
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 active:scale-95 hover:scale-105 ${
                     selectedCategory === cat
-                      ? 'bg-orange-500/20 border border-orange-400 text-orange-300'
-                      : 'bg-slate-900/60 border border-slate-800 text-slate-400 hover:text-slate-200'
+                      ? 'bg-gradient-to-r from-orange-500/25 to-amber-500/25 border border-orange-400 text-orange-300 shadow-[0_0_12px_rgba(249,115,22,0.3)]'
+                      : 'bg-[#0a1226]/80 border border-cyan-500/20 text-slate-400 hover:text-slate-200 hover:border-cyan-400/40'
                   }`}
                 >
                   {cat}
@@ -239,34 +242,51 @@ export const CountryNewsSheet: React.FC<CountryNewsSheetProps> = ({
                 </p>
               </div>
             ) : (
-              filteredArticles.map((article) => (
-                <article
-                  key={article.id}
-                  onClick={() => onOpenArticle(article)}
-                  className="p-3.5 rounded-2xl bg-slate-900/70 hover:bg-slate-850 border border-slate-800/80 hover:border-cyan-500/35 transition-all cursor-pointer flex gap-3.5 items-start group active:scale-[0.99]"
-                >
-                  <img
-                    src={article.imageUrl}
-                    alt={article.title}
-                    className="w-20 h-20 rounded-xl object-cover flex-none bg-slate-800 border border-slate-800"
-                    loading="lazy"
-                  />
+              filteredArticles.map((article) => {
+                const isLive = article.isBreaking;
+                const isLatest = !isLive && isLatestArticle(article);
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 text-[11px] text-slate-400 mb-1">
-                      <span className="font-semibold text-cyan-400">{article.source}</span>
-                      <span aria-hidden="true" className="text-slate-600">·</span>
-                      <span className="text-slate-400">{article.category}</span>
-                      <span aria-hidden="true" className="text-slate-600">·</span>
-                      <span className="flex items-center gap-1 text-slate-400">
-                        <Clock className="w-3 h-3 text-slate-500" />
-                        <span>{article.publishedAt}</span>
-                      </span>
-                    </div>
+                return (
+                  <article
+                    key={article.id}
+                    onClick={() => onOpenArticle(article)}
+                    className="p-3.5 rounded-2xl bg-[#0a1226]/75 hover:bg-[#0d1833] border border-cyan-500/20 hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(0,243,255,0.15)] transition-all duration-200 cursor-pointer flex gap-3.5 items-start group active:scale-[0.99]"
+                  >
+                    <img
+                      src={article.imageUrl}
+                      alt={article.title}
+                      className="w-20 h-20 rounded-xl object-cover flex-none bg-slate-800 border border-cyan-500/20 group-hover:border-cyan-400/40 transition-colors"
+                      loading="lazy"
+                    />
 
-                    <h3 className="text-xs sm:text-sm font-bold text-white group-hover:text-cyan-300 transition-colors line-clamp-2 leading-snug">
-                      {article.title}
-                    </h3>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400 mb-1">
+                        {/* Neon LIVE or LATEST Badge */}
+                        {isLive ? (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-500/20 border border-rose-500/60 text-[9px] font-extrabold text-rose-300 shadow-[0_0_10px_rgba(244,63,94,0.45)] animate-pulse">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" />
+                            LIVE
+                          </span>
+                        ) : isLatest ? (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-cyan-500/20 border border-cyan-400/60 text-[9px] font-extrabold text-cyan-300 shadow-[0_0_10px_rgba(0,243,255,0.4)] animate-pulse">
+                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                            LATEST
+                          </span>
+                        ) : null}
+
+                        <span className="font-semibold text-cyan-400">{article.source}</span>
+                        <span aria-hidden="true" className="text-slate-600">·</span>
+                        <span className="text-slate-300">{article.category}</span>
+                        <span aria-hidden="true" className="text-slate-600">·</span>
+                        <span className="flex items-center gap-1 text-slate-400">
+                          <Clock className="w-3 h-3 text-slate-500" />
+                          <span>{article.publishedAt}</span>
+                        </span>
+                      </div>
+
+                      <h3 className="text-xs sm:text-sm font-bold text-white group-hover:text-cyan-300 transition-colors line-clamp-2 leading-snug">
+                        {article.title}
+                      </h3>
 
                     <p className="text-[11px] text-slate-400 line-clamp-2 mt-1 leading-relaxed">
                       {article.summary}
@@ -292,9 +312,10 @@ export const CountryNewsSheet: React.FC<CountryNewsSheetProps> = ({
                     </div>
                   </div>
                 </article>
-              ))
-            )}
-          </div>
+              );
+            })
+          )}
+        </div>
         )}
 
         {/* Tab 2: Economic Calendar */}
