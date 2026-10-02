@@ -8,6 +8,7 @@ import {
   Compass,
   Play,
   Pause,
+  Headphones,
 } from 'lucide-react';
 
 interface LeftNavRailProps {
@@ -16,6 +17,7 @@ interface LeftNavRailProps {
   onOpenEconomicCalendar: () => void;
   onOpenSavedArticles: () => void;
   onOpenProfile: () => void;
+  onOpenDailyBriefing?: () => void;
   isTourActive?: boolean;
   onToggleNewsTour?: () => void;
 }
@@ -37,12 +39,25 @@ export const LeftNavRail: React.FC<LeftNavRailProps> = ({
   onOpenEconomicCalendar,
   onOpenSavedArticles,
   onOpenProfile,
+  onOpenDailyBriefing,
   isTourActive = false,
   onToggleNewsTour,
 }) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const navItems: NavItem[] = [
+    ...(onOpenDailyBriefing
+      ? [
+          {
+            id: 'briefing',
+            label: 'Briefing 60d',
+            sublabel: 'Audio Ringkasan Eksekutif',
+            icon: <Headphones className="w-4 h-4 text-amber-400" />,
+            onClick: onOpenDailyBriefing,
+            accentColor: 'hover:border-amber-400/50 hover:shadow-amber-500/20',
+          },
+        ]
+      : []),
     {
       id: 'for-you',
       label: 'Untuk Anda',
