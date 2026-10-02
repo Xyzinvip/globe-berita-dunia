@@ -28,14 +28,14 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = ({
           onSelectCountryName(currentAlert.country);
         }
       }}
-      className="cursor-pointer group flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/85 backdrop-blur-xl border border-cyan-500/25 shadow-lg max-w-xl mx-auto w-full transition active:scale-98 hover:border-cyan-400/50"
+      className="cursor-pointer group flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0a0e17]/85 backdrop-blur-xl border border-cyan-500/30 shadow-[0_0_18px_rgba(0,243,255,0.12)] max-w-xl mx-auto w-full transition-all duration-200 active:scale-98 hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(0,243,255,0.25)]"
     >
       <div className="flex items-center gap-1.5 flex-none">
         <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500 shadow-[0_0_8px_#f43f5e]" />
         </span>
-        <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20">
+        <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-300 bg-rose-500/20 px-1.5 py-0.5 rounded border border-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.3)]">
           KILAS
         </span>
       </div>
@@ -47,7 +47,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = ({
         </p>
       </div>
 
-      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-300 flex-none" />
+      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-300 group-hover:translate-x-0.5 flex-none transition-transform" />
     </div>
   );
 };
