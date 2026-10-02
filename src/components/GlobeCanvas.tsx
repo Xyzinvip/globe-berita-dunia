@@ -551,10 +551,10 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
             const armLen = 7;
 
             ctx.save();
-            ctx.strokeStyle = '#00F3FF';
-            ctx.shadowColor = '#00F3FF';
-            ctx.shadowBlur = 10;
-            ctx.lineWidth = 1.8;
+            ctx.strokeStyle = '#FF3B30';
+            ctx.shadowColor = '#FF3B30';
+            ctx.shadowBlur = 14;
+            ctx.lineWidth = 2.0;
 
             // 4 Corner Brackets: ⌜ ⌝ ⌞ ⌟
             ctx.beginPath();
@@ -577,7 +577,7 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
             ctx.stroke();
 
             // Cardinal Crosshair Ticks
-            ctx.lineWidth = 1.2;
+            ctx.lineWidth = 1.4;
             ctx.beginPath();
             ctx.moveTo(tx, ty - reticleSize - 3);
             ctx.lineTo(tx, ty - reticleSize - 10);
@@ -596,8 +596,8 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
             ctx.beginPath();
             ctx.setLineDash([3, 5]);
             ctx.arc(0, 0, reticleSize * 1.3, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(0, 243, 255, 0.65)';
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(255, 59, 48, 0.75)';
+            ctx.lineWidth = 1.2;
             ctx.stroke();
             ctx.restore();
 
@@ -610,8 +610,8 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
 
             ctx.beginPath();
             ctx.setLineDash([]);
-            ctx.strokeStyle = 'rgba(0, 243, 255, 0.75)';
-            ctx.lineWidth = 1.2;
+            ctx.strokeStyle = 'rgba(255, 59, 48, 0.85)';
+            ctx.lineWidth = 1.4;
             ctx.moveTo(leaderStartX, leaderStartY);
             ctx.lineTo(leaderMidX, leaderMidY);
             ctx.lineTo(leaderEndX, leaderMidY);
@@ -619,20 +619,23 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
 
             // Leader anchor point
             ctx.beginPath();
-            ctx.arc(leaderStartX, leaderStartY, 2, 0, Math.PI * 2);
-            ctx.fillStyle = '#00F3FF';
+            ctx.arc(leaderStartX, leaderStartY, 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#FF3B30';
             ctx.fill();
 
-            // HUD Text Readout next to leader line
+            // HUD Text Readout next to leader line (High contrast)
             ctx.font = 'bold 9px monospace';
-            ctx.fillStyle = '#00F3FF';
+            ctx.fillStyle = '#FF3B30';
+            ctx.shadowColor = '#FF3B30';
+            ctx.shadowBlur = 6;
             ctx.fillText(
               `TARGET LOCK: ${selectedCountry.code || selectedCountry.name.slice(0, 3).toUpperCase()}`,
               leaderMidX + 4,
               leaderMidY - 4
             );
+            ctx.shadowBlur = 0;
             ctx.font = '8px monospace';
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.fillStyle = '#ffffff';
             ctx.fillText(
               `LAT ${selectedCountry.center[1].toFixed(1)}° LNG ${selectedCountry.center[0].toFixed(1)}°`,
               leaderMidX + 4,
@@ -701,8 +704,19 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
       const proj = projRef.current;
       const targetCoords = country.center; // [lng, lat]
       const fromRotate = proj.rotate();
-      const toRotate: [number, number] = [-targetCoords[0], -targetCoords[1]];
-      const interpolate = d3.interpolate(fromRotate, [toRotate[0], toRotate[1], 0]);
+
+      // Normalize longitude rotation to always take the shortest geodesic angular path without jittering
+      const startLng = fromRotate[0];
+      let targetLng = -targetCoords[0];
+      let diffLng = (targetLng - startLng) % 360;
+      if (diffLng > 180) diffLng -= 360;
+      if (diffLng < -180) diffLng += 360;
+      targetLng = startLng + diffLng;
+
+      const startLat = fromRotate[1];
+      const targetLat = Math.max(-85, Math.min(85, -targetCoords[1]));
+
+      const interpolate = d3.interpolate([startLng, startLat, 0], [targetLng, targetLat, 0]);
 
       const fromScale = scaleFactorRef.current;
       const targetScale = Math.max(1.35, Math.min(1.6, fromScale >= 1.2 ? fromScale : 1.38));
@@ -808,6 +822,17 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
       }
 
       if (isDraggingRef.current) {
+        // Cancel any running camera flight animation to prevent jitter
+        if (flyAnimRef.current) {
+          cancelAnimationFrame(flyAnimRef.current);
+          flyAnimRef.current = null;
+        }
+
+        // Cleanly reset target lock status on user manual drag override
+        if (selectedCountry) {
+          onSelectCountry(null);
+        }
+
         const curRot = proj.rotate();
         const sensitivity = 0.32 / scaleFactor;
         const nextLat = Math.max(-85, Math.min(85, curRot[1] - dy * sensitivity));
@@ -861,7 +886,8 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
     if (!wasDragging && tapDuration < 380) {
       const found = pickCountry(e.clientX, e.clientY);
       if (found && found.properties?.name) {
-        const country = getCountryInfo(found.properties.name, String(found.id || ''));
+        const centroid = d3.geoCentroid(found);
+        const country = getCountryInfo(found.properties.name, String(found.id || ''), centroid);
         onSelectCountry(country);
       } else {
         if (selectedCountry) {
