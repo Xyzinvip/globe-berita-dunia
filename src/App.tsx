@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { GlobeCanvas } from './components/GlobeCanvas';
 import { TopNav } from './components/TopNav';
+import { LeftNavRail } from './components/LeftNavRail';
+import { TrendingNewsPanel } from './components/TrendingNewsPanel';
+import { BottomFilterDock, CategoryFilter, TimeRangeFilter } from './components/BottomFilterDock';
+import { SelfCollapsingHelp } from './components/SelfCollapsingHelp';
+import { NewsTourOverlay } from './components/NewsTourOverlay';
 import { BreakingNewsTicker } from './components/BreakingNewsTicker';
 import { CountryNewsSheet } from './components/CountryNewsSheet';
 import { InAppArticleReader } from './components/InAppArticleReader';
@@ -13,7 +18,6 @@ import { PersonalizedFeedView } from './components/PersonalizedFeedView';
 import { InAppPushBanner } from './components/InAppPushBanner';
 import { GeminiChatModal } from './components/GeminiChatModal';
 import { AIAssistantWidget } from './components/AIAssistantWidget';
-import { Bot, Sparkles } from 'lucide-react';
 import { CountryInfo, NewsArticle, UserProfile } from './types';
 import { getCountryInfo } from './data/countries';
 import { getNewsForCountry, CURATED_NEWS, FALLBACK_WORLD_NEWS } from './data/newsData';
@@ -21,11 +25,30 @@ import { getUserProfile, getNotifications } from './utils/storage';
 import { notificationService } from './services/notificationService';
 import { fetchLiveNews } from './services/newsApi';
 
+const TOUR_COUNTRIES = [
+  'Indonesia',
+  'Amerika Serikat',
+  'Jepang',
+  'Inggris',
+  'Tiongkok',
+  'Jerman',
+  'Ukraina',
+  'Arab Saudi',
+];
+
 export default function App() {
   const [selectedCountry, setSelectedCountry] = useState<CountryInfo | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  // Filters
+  const [filterCategory, setFilterCategory] = useState<CategoryFilter>('Semua');
+  const [filterTimeRange, setFilterTimeRange] = useState<TimeRangeFilter>('24j');
+
+  // News Tour state
+  const [isTourActive, setIsTourActive] = useState<boolean>(false);
+  const [tourStopIndex, setTourStopIndex] = useState<number>(0);
 
   // Modals & views
   const [showGeminiChat, setShowGeminiChat] = useState<boolean>(false);
@@ -45,6 +68,35 @@ export default function App() {
     const list = Object.values(CURATED_NEWS).flat();
     return [...list, ...FALLBACK_WORLD_NEWS];
   });
+
+  // Tour Country List
+  const tourCountryList = useMemo(() => {
+    return TOUR_COUNTRIES.map((c) => getCountryInfo(c)).filter(Boolean) as CountryInfo[];
+  }, []);
+
+  // News Tour auto-advance every 7 seconds
+  useEffect(() => {
+    if (!isTourActive || tourCountryList.length === 0) return;
+    const interval = setInterval(() => {
+      setTourStopIndex((prev) => (prev + 1) % tourCountryList.length);
+    }, 7000);
+    return () => clearInterval(interval);
+  }, [isTourActive, tourCountryList.length]);
+
+  const currentTourCountry =
+    isTourActive && tourCountryList.length > 0 ? tourCountryList[tourStopIndex] : null;
+
+  const tourHeadline = useMemo(() => {
+    if (!currentTourCountry) return undefined;
+    const list = getNewsForCountry(currentTourCountry.name, currentTourCountry.code);
+    return list[0]?.title || 'Memantau perkembangan geopolitik dan ekonomi terbaru...';
+  }, [currentTourCountry]);
+
+  const tourCategory = useMemo(() => {
+    if (!currentTourCountry) return undefined;
+    const list = getNewsForCountry(currentTourCountry.name, currentTourCountry.code);
+    return list[0]?.category || 'Dunia';
+  }, [currentTourCountry]);
 
   // Sync theme
   useEffect(() => {
@@ -146,7 +198,6 @@ export default function App() {
   // Keyboard navigation shortcuts for desktop
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't intercept if user is typing in an input
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) {
         return;
       }
@@ -161,6 +212,7 @@ export default function App() {
         setShowEconomicCalendar(false);
         setShowSavedArticles(false);
         setShowCountryList(false);
+        setIsTourActive(false);
       } else if (e.code === 'Space') {
         e.preventDefault();
         setAutoRotate((prev) => !prev);
@@ -182,6 +234,9 @@ export default function App() {
   }, []);
 
   const handleSelectCountry = (country: CountryInfo | null) => {
+    if (country && isTourActive) {
+      setIsTourActive(false);
+    }
     setSelectedCountry(country);
     if (country) {
       setAutoRotate(false);
@@ -212,71 +267,97 @@ export default function App() {
       <GlobeCanvas
         selectedCountry={selectedCountry}
         onSelectCountry={handleSelectCountry}
-        autoRotate={autoRotate}
+        autoRotate={autoRotate && !isTourActive}
         onToggleAutoRotate={() => setAutoRotate((prev) => !prev)}
         theme={theme}
+        filterCategory={filterCategory}
+        filterTimeRange={filterTimeRange}
+        tourCountry={currentTourCountry}
       />
 
       {/* Floating In-App Push Notification Alert Banner */}
       <InAppPushBanner onOpenArticle={handleOpenArticleById} />
 
-      {/* Top Navigation & Action Controls */}
+      {/* Top Navigation: 1 sleek compact row */}
       <TopNav
         onSelectCountry={handleSelectCountry}
         theme={theme}
         onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
-        onOpenEconomicCalendar={() => setShowEconomicCalendar(true)}
-        onOpenSavedArticles={() => setShowSavedArticles(true)}
-        onOpenCountryList={() => setShowCountryList(true)}
-        onOpenProfile={() => setShowProfileModal(true)}
         onOpenNotifications={() => {
           setShowNotificationsModal(true);
           refreshUnreadCount();
         }}
-        onOpenForYou={() => setShowForYouFeed(true)}
-        onOpenAIChat={() => setShowGeminiChat(true)}
         unreadNotificationsCount={unreadNotifCount}
         userProfile={userProfile}
-        autoRotate={autoRotate}
+        onOpenProfile={() => setShowProfileModal(true)}
       />
 
-      {/* Live Breaking News Ticker (under top nav) */}
-      {!selectedCountry && (
-        <div className="fixed top-[calc(env(safe-area-inset-top,0px)+86px)] left-3.5 right-3.5 max-w-xl mx-auto z-20 pointer-events-auto">
+      {/* Vertical Left Icon Rail with Managed Tooltips */}
+      <LeftNavRail
+        onOpenForYou={() => setShowForYouFeed(true)}
+        onOpenCountryList={() => setShowCountryList(true)}
+        onOpenEconomicCalendar={() => setShowEconomicCalendar(true)}
+        onOpenSavedArticles={() => setShowSavedArticles(true)}
+        onOpenProfile={() => setShowProfileModal(true)}
+        isTourActive={isTourActive}
+        onToggleNewsTour={() => {
+          setIsTourActive((prev) => {
+            const next = !prev;
+            if (next) {
+              setSelectedCountry(null);
+              setSelectedArticle(null);
+            }
+            return next;
+          });
+        }}
+      />
+
+      {/* Live Breaking News Ticker */}
+      {!selectedCountry && !isTourActive && (
+        <div className="fixed top-[calc(env(safe-area-inset-top,0px)+68px)] left-16 sm:left-24 right-3.5 sm:right-84 max-w-xl mx-auto z-20 pointer-events-auto">
           <BreakingNewsTicker onSelectCountryName={handleSelectCountryByName} />
         </div>
       )}
 
-      {/* Desktop Helper Bar at Bottom Left (Sci-Fi Glassmorphism) */}
-      <div className="hidden lg:flex fixed bottom-5 left-6 z-20 items-center gap-3 px-4 py-2.5 rounded-2xl bg-[#0a0e17]/80 backdrop-blur-xl border border-cyan-500/25 text-xs text-slate-300 shadow-[0_0_15px_rgba(0,243,255,0.08)] pointer-events-auto">
-        <span className="font-semibold text-cyan-400">Pintasan:</span>
-        <kbd className="px-1.5 py-0.5 rounded bg-slate-800/90 border border-cyan-500/30 font-mono text-[11px] text-cyan-300 shadow-sm">
-          Spasi
-        </kbd>
-        <span>Putar</span>
-        <span aria-hidden="true" className="text-slate-600">·</span>
-        <kbd className="px-1.5 py-0.5 rounded bg-slate-800/90 border border-cyan-500/30 font-mono text-[11px] text-cyan-400 shadow-sm">
-          C
-        </kbd>
-        <span>Tanya AI</span>
-        <span aria-hidden="true" className="text-slate-600">·</span>
-        <kbd className="px-1.5 py-0.5 rounded bg-slate-800/90 border border-orange-500/30 font-mono text-[11px] text-orange-300 shadow-sm">
-          P
-        </kbd>
-        <span>Profil</span>
-        <span aria-hidden="true" className="text-slate-600">·</span>
-        <kbd className="px-1.5 py-0.5 rounded bg-slate-800/90 border border-amber-500/30 font-mono text-[11px] text-amber-300 shadow-sm">
-          N
-        </kbd>
-        <span>Notif</span>
-        <span aria-hidden="true" className="text-slate-600">·</span>
-        <kbd className="px-1.5 py-0.5 rounded bg-slate-800/90 border border-slate-700 font-mono text-[11px] text-slate-300 shadow-sm">
-          Esc
-        </kbd>
-        <span>Tutup</span>
-      </div>
+      {/* Trending "Sedang Hangat" Collapsible Floating Panel */}
+      {!selectedCountry && !isTourActive && (
+        <TrendingNewsPanel
+          articles={allArticles}
+          onSelectArticle={handleOpenArticle}
+          onFlyToCountryName={handleSelectCountryByName}
+        />
+      )}
 
-      {/* Draggable Holographic Chibi AI Assistant Widget */}
+      {/* Bottom Filter Dock (Merged Category & Time Range Chips) */}
+      {!selectedCountry && !isTourActive && (
+        <BottomFilterDock
+          selectedCategory={filterCategory}
+          onSelectCategory={setFilterCategory}
+          selectedTimeRange={filterTimeRange}
+          onSelectTimeRange={setFilterTimeRange}
+        />
+      )}
+
+      {/* Self-Collapsing Navigation Prompt & Accessible Help */}
+      {!selectedCountry && !isTourActive && <SelfCollapsingHelp />}
+
+      {/* News Tour HUD Overlay */}
+      <NewsTourOverlay
+        isActive={isTourActive}
+        currentStopIndex={tourStopIndex}
+        totalStops={tourCountryList.length}
+        country={currentTourCountry}
+        headline={tourHeadline}
+        category={tourCategory}
+        onStopTour={() => setIsTourActive(false)}
+        onOpenCountry={(c) => {
+          setIsTourActive(false);
+          handleSelectCountry(c);
+        }}
+        durationMs={7000}
+      />
+
+      {/* Single Consolidated AI Gateway: Draggable Holographic Mascot */}
       <AIAssistantWidget
         onOpenAIChat={() => setShowGeminiChat(true)}
         selectedCountry={selectedCountry}
@@ -287,10 +368,9 @@ export default function App() {
         country={selectedCountry}
         onClose={() => setSelectedCountry(null)}
         onOpenArticle={handleOpenArticle}
-        onOpenAIChat={() => setShowGeminiChat(true)}
       />
 
-      {/* In-App Direct Article Reader (Native in-app reader without opening external tabs) */}
+      {/* In-App Direct Article Reader */}
       {selectedArticle && (
         <InAppArticleReader
           article={selectedArticle}
