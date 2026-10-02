@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NewsArticle, UserProfile } from '../types';
 import { filterPersonalizedNews } from '../services/newsApi';
+import { getArticleThumbnail, getCategoryFallbackImage } from '../services/newsImageEngine';
 import {
   Sparkles,
   X,
@@ -197,8 +198,11 @@ export const PersonalizedFeedView: React.FC<PersonalizedFeedViewProps> = ({
                   className="p-3.5 sm:p-4 rounded-2xl bg-slate-800/50 hover:bg-slate-800/80 border border-slate-700/60 hover:border-orange-500/40 transition-all cursor-pointer flex flex-col sm:flex-row gap-3.5 group active:scale-[0.99]"
                 >
                   <img
-                    src={article.imageUrl}
+                    src={getArticleThumbnail(article)}
                     alt={article.title}
+                    onError={(e) => {
+                      e.currentTarget.src = getCategoryFallbackImage(article.category);
+                    }}
                     className="w-full sm:w-36 h-36 sm:h-28 rounded-xl object-cover bg-slate-800 shrink-0"
                     loading="lazy"
                   />
