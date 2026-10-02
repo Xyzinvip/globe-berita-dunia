@@ -132,7 +132,7 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
             ) : (
               <>
                 <BellRing className="w-4 h-4 text-cyan-400 shrink-0" />
-                <span className="text-slate-300">Aktifkan push alert untuk HP / APK</span>
+                <span className="text-slate-300">Aktifkan push alert notifikasi</span>
               </>
             )}
           </div>
