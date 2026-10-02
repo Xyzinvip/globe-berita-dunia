@@ -13,6 +13,17 @@ interface GlobeCanvasProps {
   autoRotate: boolean;
   onToggleAutoRotate: () => void;
   theme: 'dark' | 'light';
+  filterCategory?: string;
+  filterTimeRange?: string;
+  tourCountry?: CountryInfo | null;
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  const cleanHex = hex.replace('#', '');
+  const r = parseInt(cleanHex.substring(0, 2), 16) || 0;
+  const g = parseInt(cleanHex.substring(2, 4), 16) || 243;
+  const b = parseInt(cleanHex.substring(4, 6), 16) || 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
@@ -21,6 +32,9 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
   autoRotate,
   onToggleAutoRotate,
   theme,
+  filterCategory,
+  filterTimeRange,
+  tourCountry,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const starsRef = useRef<HTMLCanvasElement | null>(null);
@@ -37,6 +51,30 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
   const countriesFeaturesRef = useRef<GeoJSON.Feature[]>([]);
   const ringAngleRef = useRef(0);
   const [hudDismissed, setHudDismissed] = useState(false);
+  const [hoveredCountry, setHoveredCountry] = useState<{
+    name: string;
+    nameId: string;
+    flag: string;
+    articleCount: number;
+    topCategory: string;
+    x: number;
+    y: number;
+  } | null>(null);
+
+  const prefersReducedMotionRef = useRef(false);
+
+  // Check prefers-reduced-motion media query
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      prefersReducedMotionRef.current = mq.matches;
+      const handler = (e: MediaQueryListEvent) => {
+        prefersReducedMotionRef.current = e.matches;
+      };
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
+    }
+  }, []);
 
   // Sync scaleFactor state to ref
   useEffect(() => {
@@ -48,19 +86,50 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
     setHudDismissed(false);
   }, [selectedCountry]);
 
-  // Pre-calculate active news locations for Spatial Wave Pulses
+  // Pre-calculate active news locations with categorical colors and pulse dynamics
   const newsPulseLocations = useMemo(() => {
-    const list: { name: string; center: [number, number]; isBreaking: boolean }[] = [];
+    const list: {
+      name: string;
+      center: [number, number];
+      isBreaking: boolean;
+      articleCount: number;
+      category: string;
+      color: string;
+      pulseSpeed: number;
+    }[] = [];
+
     for (const [countryName, articles] of Object.entries(CURATED_NEWS)) {
       const info = COUNTRIES_DATA[countryName];
-      if (info && info.center) {
-        const isBreaking = articles.some(
-          (a) => Boolean(a.isBreaking)
-        );
+      if (info && info.center && articles.length > 0) {
+        const isBreaking = articles.some((a) => Boolean(a.isBreaking));
+        const count = articles.length;
+        const dominantCategory = articles[0]?.category || 'Dunia';
+
+        // Categorical color determination (Fase 3)
+        let color = '#00F3FF';
+        const catLower = dominantCategory.toLowerCase();
+        if (catLower.includes('ekonomi') || catLower.includes('economy')) {
+          color = '#f59e0b'; // Amber
+        } else if (catLower.includes('politik') || catLower.includes('politics')) {
+          color = '#a855f7'; // Purple/Violet
+        } else if (catLower.includes('teknologi') || catLower.includes('tech')) {
+          color = '#10b981'; // Green
+        } else if (catLower.includes('sains') || catLower.includes('science')) {
+          color = '#00F3FF'; // Cyan
+        } else {
+          color = '#ef4444'; // Red for World/Breaking
+        }
+
+        const pulseSpeed = isBreaking ? 1.8 : count > 2 ? 1.4 : 1.0;
+
         list.push({
           name: countryName,
           center: info.center,
           isBreaking,
+          articleCount: count,
+          category: dominantCategory,
+          color,
+          pulseSpeed,
         });
       }
     }
@@ -200,13 +269,18 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
       const proj = projRef.current;
       const isSheetOpen = !!selectedCountry;
       const curScale = scaleFactorRef.current;
+      const isDesktop = width >= 1024;
       const baseRadius = Math.min(width, height * 0.82) * 0.44;
       const currentRadius = isSheetOpen
-        ? Math.min(baseRadius * curScale * 0.72, height * 0.22)
+        ? Math.min(baseRadius * curScale * 0.75, height * (isDesktop ? 0.36 : 0.22))
         : baseRadius * curScale;
-      const centerY = isSheetOpen ? height * 0.26 : height * 0.45;
 
-      proj.scale(currentRadius).translate([width / 2, centerY]);
+      // Camera Target Offset (Fase 3): on desktop, shift globe left so right news drawer doesn't obstruct target!
+      // On mobile, shift globe upward so bottom sheet doesn't obstruct target!
+      const targetCenterX = isSheetOpen && isDesktop ? width * 0.36 : width / 2;
+      const targetCenterY = isSheetOpen && !isDesktop ? height * 0.24 : height * 0.45;
+
+      proj.scale(currentRadius).translate([targetCenterX, targetCenterY]);
 
       const path = d3.geoPath(proj, ctx);
       const center = proj.translate();
@@ -309,10 +383,11 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         }
       }
 
-      // --- Spatial News Wave / Pulse Layer (Step 2: Concentric fading neon rings) ---
+      // --- Spatial News Wave / Pulse Layer (Fase 3: Categorical colors & dynamic pulse) ---
       const curRot = proj.rotate();
       const centerLng = -curRot[0];
       const centerLat = -curRot[1];
+      const isReducedMotion = prefersReducedMotionRef.current;
 
       for (let i = 0; i < newsPulseLocations.length; i++) {
         const item = newsPulseLocations[i];
@@ -322,39 +397,44 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         const pt = proj(item.center);
         if (!pt || !isFinite(pt[0]) || !isFinite(pt[1])) continue;
 
-        const isBreaking = item.isBreaking;
-        const baseColor = isBreaking ? '#ff3b30' : '#00F3FF';
+        // Check category filter
+        const isMatch = !filterCategory || filterCategory === 'Semua' || item.category.toLowerCase().includes(filterCategory.toLowerCase());
+        const baseColor = item.color;
         const waveScale = Math.min(2.0, Math.max(0.8, curScale));
+        const alphaMultiplier = isMatch ? 1 : 0.2;
 
-        // 3 concentric fading wave pulses
-        for (let w = 0; w < 3; w++) {
-          const phase = ((timestamp / 2000) + (w * 0.33) + (i * 0.15)) % 1;
-          const ringRadius = 4 + phase * 26 * waveScale;
-          const alpha = (1 - phase) * 0.85;
+        if (!isReducedMotion && isMatch) {
+          // 3 concentric fading wave pulses with speed proportional to recency
+          for (let w = 0; w < 3; w++) {
+            const phase = ((timestamp / (2000 / item.pulseSpeed)) + (w * 0.33) + (i * 0.15)) % 1;
+            const ringRadius = 4 + phase * (18 + Math.min(16, item.articleCount * 3)) * waveScale;
+            const alpha = (1 - phase) * 0.85 * alphaMultiplier;
 
-          ctx.beginPath();
-          ctx.arc(pt[0], pt[1], ringRadius, 0, Math.PI * 2);
-          ctx.strokeStyle = isBreaking
-            ? `rgba(255, 59, 48, ${alpha})`
-            : `rgba(0, 243, 255, ${alpha})`;
-          ctx.lineWidth = Math.max(0.8, 1.8 * (1 - phase * 0.4));
-          ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(pt[0], pt[1], ringRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = hexToRgba(baseColor, alpha);
+            ctx.lineWidth = Math.max(0.8, 1.8 * (1 - phase * 0.4));
+            ctx.stroke();
+          }
         }
 
-        // Center glowing beacon core
+        // Center glowing beacon core (scaled by volume)
+        const coreRadius = (2.8 + Math.min(2.5, item.articleCount * 0.6)) * (isMatch ? 1 : 0.65);
         ctx.beginPath();
-        ctx.arc(pt[0], pt[1], 3.2, 0, Math.PI * 2);
-        ctx.fillStyle = baseColor;
-        ctx.shadowColor = baseColor;
-        ctx.shadowBlur = 10;
+        ctx.arc(pt[0], pt[1], coreRadius, 0, Math.PI * 2);
+        ctx.fillStyle = isMatch ? baseColor : 'rgba(100, 116, 139, 0.35)';
+        ctx.shadowColor = isMatch ? baseColor : 'transparent';
+        ctx.shadowBlur = isMatch ? 10 : 0;
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // White core highlight
-        ctx.beginPath();
-        ctx.arc(pt[0], pt[1], 1.2, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
+        // White core highlight if matching
+        if (isMatch) {
+          ctx.beginPath();
+          ctx.arc(pt[0], pt[1], 1.2, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+        }
       }
 
       // --- Holographic Target Reticle / Crosshair HUD Lock (Step 3) ---
@@ -473,7 +553,7 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
       ctx.shadowBlur = 0;
       ctx.globalAlpha = 1;
     },
-    [selectedCountry, scaleFactor, colors, newsPulseLocations]
+    [selectedCountry, scaleFactor, colors, newsPulseLocations, filterCategory]
   );
 
   // Smooth rotation animation loop
@@ -483,7 +563,7 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
     const tick = (time: number) => {
       if (!running) return;
 
-      if (autoRotate && !isDraggingRef.current && !selectedCountry) {
+      if (autoRotate && !isDraggingRef.current && !selectedCountry && !prefersReducedMotionRef.current) {
         const currentRot = projRef.current.rotate();
         projRef.current.rotate([currentRot[0] + 0.18, currentRot[1], currentRot[2]]);
       }
@@ -515,7 +595,7 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
       const fromScale = scaleFactorRef.current;
       const targetScale = Math.max(1.35, Math.min(1.6, fromScale >= 1.2 ? fromScale : 1.38));
       const startTime = performance.now();
-      const duration = 750; // ms
+      const duration = prefersReducedMotionRef.current ? 120 : 750; // ms
 
       const step = (now: number) => {
         const elapsed = now - startTime;
@@ -549,6 +629,13 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
     }
   }, [selectedCountry, flyToCountry]);
 
+  // Trigger flyTo when news tour advances to next country
+  useEffect(() => {
+    if (tourCountry) {
+      flyToCountry(tourCountry);
+    }
+  }, [tourCountry, flyToCountry]);
+
   // Pointer / Touch interaction handlers
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -568,6 +655,30 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    // Desktop hover detection when not dragging
+    if (!isDraggingRef.current && pointersMapRef.current.size === 0) {
+      const found = pickCountry(e.clientX, e.clientY);
+      if (found && found.properties?.name) {
+        const cInfo = getCountryInfo(found.properties.name, String(found.id || ''));
+        const newsItem = newsPulseLocations.find(
+          (n) => n.name.toLowerCase() === cInfo.name.toLowerCase() || n.name.toLowerCase() === cInfo.nameId.toLowerCase()
+        );
+        setHoveredCountry({
+          name: cInfo.name,
+          nameId: cInfo.nameId,
+          flag: cInfo.flag,
+          articleCount: newsItem ? newsItem.articleCount : 0,
+          topCategory: newsItem ? newsItem.category : 'Global',
+          x: e.clientX,
+          y: e.clientY,
+        });
+      } else {
+        setHoveredCountry(null);
+      }
+    } else {
+      setHoveredCountry(null);
+    }
+
     if (!pointersMapRef.current.has(e.pointerId)) return;
     pointersMapRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
@@ -626,6 +737,7 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
     const startTime = lastPointerRef.current?.time || 0;
     const tapDuration = performance.now() - startTime;
 
+    setHoveredCountry(null);
     pointersMapRef.current.delete(e.pointerId);
     if (pointersMapRef.current.size === 0) {
       isDraggingRef.current = false;
@@ -666,11 +778,12 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        onPointerLeave={() => setHoveredCountry(null)}
         onWheel={handleWheel}
       />
 
-      {/* Interactive Controls Overlay (Dark Glassmorphism) */}
-      <div className="absolute bottom-6 right-4 flex flex-col gap-2.5 z-20">
+      {/* Interactive Controls Overlay (Reset Zoom & Tour/Rotate) */}
+      <div className="absolute bottom-20 right-4 sm:right-6 flex flex-col gap-2.5 z-20">
         {/* Reset Zoom */}
         <button
           onClick={() => {
@@ -679,7 +792,7 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
             drawGlobe(performance.now());
           }}
           title="Reset Zoom (1x)"
-          className="w-11 h-11 rounded-2xl bg-[#0a0e17]/80 backdrop-blur-xl border border-cyan-500/30 text-cyan-300 flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.12)] active:scale-92 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(0,243,255,0.25)] transition-all"
+          className="w-10 h-10 rounded-2xl bg-[#0a0e17]/80 backdrop-blur-xl border border-cyan-500/30 text-cyan-300 flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.12)] active:scale-92 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(0,243,255,0.25)] transition-all"
         >
           <span className="text-xs font-bold tracking-tight">1x</span>
         </button>
@@ -688,13 +801,13 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         <button
           onClick={onToggleAutoRotate}
           title={autoRotate ? 'Hentikan Putaran' : 'Putar Otomatis'}
-          className={`w-11 h-11 rounded-2xl backdrop-blur-xl border transition-all flex items-center justify-center shadow-lg active:scale-92 ${
+          className={`w-10 h-10 rounded-2xl backdrop-blur-xl border transition-all flex items-center justify-center shadow-lg active:scale-92 ${
             autoRotate
               ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 shadow-[0_0_20px_rgba(0,243,255,0.3)]'
               : 'bg-[#0a0e17]/80 border-cyan-500/20 text-slate-400 hover:text-slate-200 hover:border-cyan-500/40'
           }`}
         >
-          <svg className={`w-5 h-5 ${autoRotate ? 'animate-spin' : ''}`} style={{ animationDuration: '6s' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg className={`w-4 h-4 ${autoRotate ? 'animate-spin' : ''}`} style={{ animationDuration: '6s' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21 12a9 9 0 1 1-3-6.7" />
             <path d="M21 3v6h-6" />
           </svg>
@@ -709,13 +822,24 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         />
       )}
 
-      {/* Hint overlay */}
-      {!selectedCountry && (
-        <div className="absolute bottom-5 left-0 right-0 text-center pointer-events-none z-10 transition-opacity">
-          <p className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#070e1c]/80 backdrop-blur-md border border-cyan-500/25 text-xs text-cyan-200/90 shadow-[0_0_15px_rgba(0,243,255,0.1)]">
-            <span>🌍</span>
-            <span>Geser untuk memutar · Cubit untuk zoom · Ketuk negara untuk kunci target & baca berita</span>
-          </p>
+      {/* Hover Tooltip on Country / Hotspot (Fase 3) */}
+      {hoveredCountry && !selectedCountry && (
+        <div
+          style={{
+            left: Math.min(window.innerWidth - 180, hoveredCountry.x + 14),
+            top: Math.max(76, hoveredCountry.y - 44),
+          }}
+          className="fixed z-40 pointer-events-none px-3 py-1.5 rounded-xl bg-[#070e1c]/95 backdrop-blur-xl border border-cyan-400/40 shadow-[0_0_20px_rgba(0,243,255,0.25)] text-xs text-white flex items-center gap-2 select-none animate-in fade-in zoom-in-95 duration-100"
+        >
+          <span className="text-base select-none">{hoveredCountry.flag}</span>
+          <div>
+            <p className="font-bold text-xs text-white leading-tight">{hoveredCountry.nameId}</p>
+            <p className="text-[10px] text-cyan-300 font-mono">
+              {hoveredCountry.articleCount > 0
+                ? `${hoveredCountry.articleCount} Berita · ${hoveredCountry.topCategory}`
+                : 'Belum ada kabar berita'}
+            </p>
+          </div>
         </div>
       )}
     </div>
