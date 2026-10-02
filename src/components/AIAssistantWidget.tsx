@@ -15,11 +15,12 @@ export const AIAssistantWidget: React.FC<AIAssistantWidgetProps> = ({
   const WIDGET_WIDTH = 68;
   const WIDGET_HEIGHT = 68;
 
-  // Position state (default to bottom-right with leftward offset: bottom 24px, right 80px)
+  // Position state (default to bottom-right with leftward offset so it does not obstruct corner controls)
   const [position, setPosition] = useState<{ x: number; y: number }>(() => {
     if (typeof window !== 'undefined') {
+      const rightOffset = window.innerWidth < 640 ? 115 : 155;
       return {
-        x: Math.max(16, window.innerWidth - WIDGET_WIDTH - 80),
+        x: Math.max(16, window.innerWidth - WIDGET_WIDTH - rightOffset),
         y: Math.max(80, window.innerHeight - WIDGET_HEIGHT - 24),
       };
     }
@@ -134,7 +135,8 @@ export const AIAssistantWidget: React.FC<AIAssistantWidgetProps> = ({
       setPosition((prev) => ({ ...prev, x: 8 }));
     } else if (screenWidth - (position.x + WIDGET_WIDTH) < dockThreshold) {
       setIsDocked('right');
-      setPosition((prev) => ({ ...prev, x: screenWidth - WIDGET_WIDTH - 80 }));
+      const rightOffset = screenWidth < 640 ? 115 : 155;
+      setPosition((prev) => ({ ...prev, x: screenWidth - WIDGET_WIDTH - rightOffset }));
     } else {
       setIsDocked(null);
     }
