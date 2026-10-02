@@ -854,12 +854,18 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
   };
 
   const pickCountry = (clientX: number, clientY: number): GeoJSON.Feature | null => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    const canvasX = clientX - rect.left;
+    const canvasY = clientY - rect.top;
+
     const proj = projRef.current;
-    const inv = proj.invert ? proj.invert([clientX, clientY]) : null;
+    const inv = proj.invert ? proj.invert([canvasX, canvasY]) : null;
     if (!inv || !isFinite(inv[0]) || !isFinite(inv[1])) return null;
 
     const center = proj.translate();
-    const distFromCenter = Math.hypot(clientX - center[0], clientY - center[1]);
+    const distFromCenter = Math.hypot(canvasX - center[0], canvasY - center[1]);
     if (distFromCenter > proj.scale()) return null;
 
     for (const feature of countriesFeaturesRef.current) {
@@ -886,8 +892,7 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
     if (!wasDragging && tapDuration < 380) {
       const found = pickCountry(e.clientX, e.clientY);
       if (found && found.properties?.name) {
-        const centroid = d3.geoCentroid(found);
-        const country = getCountryInfo(found.properties.name, String(found.id || ''), centroid);
+        const country = getCountryInfo(found.properties.name, String(found.id || ''));
         onSelectCountry(country);
       } else {
         if (selectedCountry) {
