@@ -385,7 +385,7 @@ Tugas Anda:
 1. Memberikan analisis mendalam, strategis, dan berbobot tinggi tentang konflik internasional, aliansi militer, traktat diplomasi, kalkulasi kekuatan hegemoni, sanksi, dan stabilitas kawasan.
 2. Jelaskan motivasi tersembunyi para aktor negara, kalkulasi geostrategis, skenario jangka panjang, dan dampak global.
 3. Gunakan bahasa Indonesia akademis, analitis, tajam, objektif, dan berwawasan luas.`,
-    defaultModel: 'gemini-3.1-pro-preview'
+    defaultModel: 'gemini-3.8-flash'
   },
   editor: {
     instruction: `Anda adalah Redaktur Senior & Jurnalis Berita Internasional di Globe Berita Dunia.
@@ -393,7 +393,7 @@ Tugas Anda:
 1. Menyajikan rangkuman berita dunia yang berimbang, akurat, dan terverifikasi dari berbagai perspektif negara-negara terkait.
 2. Menguraikan kronologi peristiwa, dampak sosial kemanusiaan, dan konteks berita secara lugas dan informatif.
 3. Gunakan gaya bahasa jurnalistik terpercaya, objektif, santun, dan mudah dipahami semua kalangan.`,
-    defaultModel: 'gemini-3.5-flash'
+    defaultModel: 'gemini-3.8-flash'
   },
   fast_fact: {
     instruction: `Anda adalah Fact-Checker Kilat (Fast Fact-Checker) di Globe Berita Dunia.
@@ -409,7 +409,7 @@ Tugas Anda:
 1. Menganalisis pasar finansial dunia, nilai tukar mata uang, komoditas energi (minyak & gas), rantai pasokan global, inflasi, dan kebijakan suku bunga bank sentral (The Fed, ECB, BI, dll).
 2. Berikan proyeksi pasar dan implikasi ekonomi praktis bagi masyarakat dan dunia usaha.
 3. Gunakan bahasa analisis keuangan yang runtut, berbasis logika ekonomi, dan jelas.`,
-    defaultModel: 'gemini-3.1-pro-preview'
+    defaultModel: 'gemini-3.8-flash'
   }
 };
 
@@ -422,31 +422,25 @@ app.post('/api/gemini/chat', async (req: Request, res: Response) => {
 
     const roleConfig = ROLE_SYSTEM_INSTRUCTIONS[roleId] || ROLE_SYSTEM_INSTRUCTIONS.editor;
     
-    // Choose model:
-    // Complex tasks -> gemini-3.1-pro-preview
-    // General tasks -> gemini-3.5-flash
-    // Fast tasks -> gemini-3.1-flash-lite
     let targetModel = model;
     if (!targetModel || targetModel === 'auto') {
-      targetModel = roleConfig.defaultModel || 'gemini-3.5-flash';
+      targetModel = roleConfig.defaultModel || 'gemini-3.8-flash';
     }
 
     const systemInstruction = `${roleConfig.instruction}
 ${contextInfo ? `\n\n[Konteks Aktif yang Sedang Dilihat Pengguna]:\n${contextInfo}` : ''}
 Aturan format: Gunakan Markdown (tebal, miring, daftar poin, kutipan) agar jawaban mudah dibaca dan terstruktur dengan rapi.`;
 
-    // Convert messages to Gemini contents format (multi-turn conversation history)
     const contents = messages.map((m: any) => ({
       role: m.role === 'model' || m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: String(m.text || m.content || '') }]
     }));
 
-    // Fallback models chain in case of quota exhaustion or rate limits on preview models
     const candidateModels = [
       targetModel,
+      'gemini-3.8-flash',
       'gemini-3.5-flash',
-      'gemini-3.1-flash-lite',
-      'gemini-3.1-pro-preview'
+      'gemini-3.1-flash-lite'
     ].filter((m, i, arr) => arr.indexOf(m) === i);
 
     let lastError: any = null;
