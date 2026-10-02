@@ -379,12 +379,14 @@ export default function App() {
       />
 
       {/* Gemini AI Multi-Turn Chatbot Modal */}
-      <GeminiChatModal
-        isOpen={showGeminiChat}
-        onClose={() => setShowGeminiChat(false)}
-        activeCountry={selectedCountry}
-        activeArticle={selectedArticle}
-      />
+      {showGeminiChat && (
+        <GeminiChatModal
+          isOpen={showGeminiChat}
+          onClose={() => setShowGeminiChat(false)}
+          activeCountry={selectedCountry}
+          activeArticle={selectedArticle}
+        />
+      )}
     </div>
   );
 }
