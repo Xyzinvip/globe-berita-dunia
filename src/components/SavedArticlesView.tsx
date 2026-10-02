@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bookmark, ChevronLeft, Trash2, Clock, BookOpen } from 'lucide-react';
 import { NewsArticle } from '../types';
 import { getBookmarks, removeBookmark } from '../utils/storage';
+import { getArticleThumbnail, getCategoryFallbackImage } from '../services/newsImageEngine';
 
 interface SavedArticlesViewProps {
   onClose: () => void;
@@ -62,8 +63,11 @@ export const SavedArticlesView: React.FC<SavedArticlesViewProps> = ({
               className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 cursor-pointer transition active:scale-[0.99] flex gap-3.5 items-center group"
             >
               <img
-                src={art.imageUrl}
+                src={getArticleThumbnail(art)}
                 alt={art.title}
+                onError={(e) => {
+                  e.currentTarget.src = getCategoryFallbackImage(art.category);
+                }}
                 className="w-20 h-20 rounded-xl object-cover flex-none bg-slate-800 group-hover:scale-105 transition duration-300"
               />
               <div className="flex-1 min-w-0">
