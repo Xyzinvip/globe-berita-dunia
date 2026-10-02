@@ -246,9 +246,9 @@ export const InAppArticleReader: React.FC<InAppArticleReaderProps> = ({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
             </span>
-            <span className="font-semibold">Mode Pembaca APK Mobile</span>
+            <span className="font-semibold">Mode Pembaca Berita Lengkap</span>
           </div>
-          <span className="text-[11px] text-cyan-400/80">Dibaca langsung di dalam aplikasi</span>
+          <span className="text-[11px] text-cyan-400/80">Dibaca langsung di dalam portal</span>
         </div>
 
         {/* Hero Image */}
