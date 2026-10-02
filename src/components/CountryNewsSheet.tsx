@@ -143,18 +143,6 @@ export const CountryNewsSheet: React.FC<CountryNewsSheetProps> = ({
                 <RefreshCw className="w-4 h-4 text-cyan-400 animate-spin mr-1" />
               </span>
             )}
-            {onOpenAIChat && (
-              <button
-                type="button"
-                onClick={onOpenAIChat}
-                title={`Tanyakan Analis AI tentang ${country.nameId}`}
-                className="px-2.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-sm"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                <span className="hidden sm:inline">Tanya AI</span>
-                <span className="sm:hidden text-[10px]">AI</span>
-              </button>
-            )}
             <button
               onClick={onClose}
               className="w-8 h-8 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center border border-slate-700/60 active:scale-95 transition"
