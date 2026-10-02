@@ -6,6 +6,7 @@ import {
   X,
   Bell,
   Globe,
+  Headphones,
 } from 'lucide-react';
 import { CountryInfo, UserProfile } from '../types';
 import { COUNTRIES_DATA } from '../data/countries';
@@ -18,6 +19,7 @@ interface TopNavProps {
   unreadNotificationsCount: number;
   userProfile?: UserProfile;
   onOpenProfile?: () => void;
+  onOpenDailyBriefing?: () => void;
 }
 
 export const TopNav: React.FC<TopNavProps> = ({
@@ -26,6 +28,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   onToggleTheme,
   onOpenNotifications,
   unreadNotificationsCount,
+  onOpenDailyBriefing,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -122,8 +125,22 @@ export const TopNav: React.FC<TopNavProps> = ({
         )}
       </div>
 
-      {/* Action Buttons: Notifications & Theme Toggle */}
+      {/* Action Buttons: Briefing 60d, Notifications & Theme Toggle */}
       <div className="flex items-center gap-1.5 flex-none">
+        {/* Briefing 60-Sec Audio Button */}
+        {onOpenDailyBriefing && (
+          <button
+            type="button"
+            onClick={onOpenDailyBriefing}
+            title="Briefing Harian AI (Ringkasan 60 Detik Audio)"
+            className="px-2.5 sm:px-3 h-9 sm:h-10 rounded-2xl bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/20 hover:from-orange-500/30 hover:to-amber-500/30 border border-orange-400/40 text-orange-300 flex items-center gap-1.5 shadow-[0_0_15px_rgba(249,115,22,0.15)] hover:scale-105 active:scale-95 transition-all"
+            aria-label="Briefing 60 Detik"
+          >
+            <Headphones className="w-4 h-4 text-orange-400 animate-pulse" />
+            <span className="text-xs font-bold tracking-tight hidden sm:inline">60d Audio</span>
+          </button>
+        )}
+
         {/* Notification Bell */}
         <button
           type="button"
