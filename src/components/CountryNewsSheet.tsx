@@ -18,6 +18,7 @@ import { getNewsForCountry } from '../data/newsData';
 import { getEconomicEventsForCountry } from '../data/economicCalendar';
 import { fetchLiveNews } from '../services/newsApi';
 import { sortArticlesChronological, isLatestArticle } from '../utils/dateHelper';
+import { getArticleThumbnail, getCategoryFallbackImage } from '../services/newsImageEngine';
 
 interface CountryNewsSheetProps {
   country: CountryInfo | null;
@@ -241,8 +242,11 @@ export const CountryNewsSheet: React.FC<CountryNewsSheetProps> = ({
                     className="p-3.5 rounded-2xl bg-[#0a1226]/75 hover:bg-[#0d1833] border border-cyan-500/20 hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(0,243,255,0.15)] transition-all duration-200 cursor-pointer flex gap-3.5 items-start group active:scale-[0.99]"
                   >
                     <img
-                      src={article.imageUrl}
+                      src={getArticleThumbnail(article)}
                       alt={article.title}
+                      onError={(e) => {
+                        e.currentTarget.src = getCategoryFallbackImage(article.category);
+                      }}
                       className="w-20 h-20 rounded-xl object-cover flex-none bg-slate-800 border border-cyan-500/20 group-hover:border-cyan-400/40 transition-colors"
                       loading="lazy"
                     />
