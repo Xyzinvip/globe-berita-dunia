@@ -1,10 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { Radio, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { BREAKING_ALERTS } from '../data/newsData';
 import { BreakingAlert } from '../types';
 
 interface BreakingNewsTickerProps {
   onSelectCountryName?: (countryName: string) => void;
+}
+
+// Native JavaScript Intl regional display names for Indonesian localization
+const regionNames = (() => {
+  try {
+    return new Intl.DisplayNames(['id'], { type: 'region' });
+  } catch {
+    return null;
+  }
+})();
+
+function getLocalizedCountryName(alert: BreakingAlert): string {
+  if (alert.countryCode && regionNames) {
+    try {
+      const localized = regionNames.of(alert.countryCode);
+      if (localized) return localized;
+    } catch {
+      // fallback
+    }
+  }
+  return alert.country;
 }
 
 export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = ({
@@ -20,6 +41,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = ({
   }, []);
 
   const currentAlert: BreakingAlert = BREAKING_ALERTS[currentIndex];
+  const localizedName = getLocalizedCountryName(currentAlert);
 
   return (
     <div
@@ -28,7 +50,8 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = ({
           onSelectCountryName(currentAlert.country);
         }
       }}
-      className="cursor-pointer group flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0a0e17]/85 backdrop-blur-xl border border-cyan-500/30 shadow-[0_0_18px_rgba(0,243,255,0.12)] max-w-xl mx-auto w-full transition-all duration-200 active:scale-98 hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(0,243,255,0.25)]"
+      className="cursor-pointer group flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0a0e17]/85 backdrop-blur-xl border border-cyan-500/30 shadow-[0_0_18px_rgba(0,243,255,0.12)] max-w-xl mx-auto w-full transition-all duration-200 active:scale-98 hover:border-cyan-400/60 hover:shadow-[0_0_25px_rgba(0,243,255,0.25)] select-none"
+      title={`Klik untuk meluncur ke ${localizedName}`}
     >
       <div className="flex items-center gap-1.5 flex-none">
         <span className="relative flex h-2 w-2">
@@ -42,7 +65,7 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = ({
 
       <div className="flex-1 min-w-0 overflow-hidden">
         <p className="text-xs text-slate-200 truncate font-medium group-hover:text-white transition">
-          <span className="font-bold text-cyan-400 mr-1.5">[{currentAlert.country}]:</span>
+          <span className="font-bold text-cyan-400 mr-1.5">[{localizedName}]:</span>
           {currentAlert.headline}
         </p>
       </div>
