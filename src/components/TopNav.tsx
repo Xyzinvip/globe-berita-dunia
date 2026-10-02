@@ -84,7 +84,7 @@ export const TopNav: React.FC<TopNavProps> = ({
       {/* Top Search & Actions Row */}
       <div className="flex items-center gap-2">
         {/* Brand mark on desktop */}
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-800 text-slate-100 shrink-0">
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-[#0a0e17]/85 backdrop-blur-xl border border-cyan-500/30 text-slate-100 shrink-0 shadow-[0_0_15px_rgba(0,243,255,0.1)]">
           <Globe className="w-4 h-4 text-cyan-400 animate-spin-slow" />
           <span className="text-xs font-bold tracking-tight bg-gradient-to-r from-white via-cyan-200 to-orange-300 bg-clip-text text-transparent">
             Globe Berita
@@ -93,7 +93,7 @@ export const TopNav: React.FC<TopNavProps> = ({
 
         {/* Search Bar with Autocomplete */}
         <div ref={searchContainerRef} className="relative flex-1">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-slate-900/85 backdrop-blur-xl border border-cyan-500/30 shadow-lg text-slate-100 transition focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-500/20">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-[#0a0e17]/85 backdrop-blur-xl border border-cyan-500/30 shadow-[0_0_15px_rgba(0,243,255,0.1)] text-slate-100 transition-all focus-within:border-cyan-400 focus-within:shadow-[0_0_20px_rgba(0,243,255,0.25)]">
             <Search className="w-4 h-4 text-cyan-400 flex-none opacity-80" />
             <input
               type="text"
@@ -110,7 +110,7 @@ export const TopNav: React.FC<TopNavProps> = ({
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="p-0.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white"
+                className="p-0.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition"
                 aria-label="Hapus pencarian"
               >
                 <X className="w-3.5 h-3.5" />
@@ -120,7 +120,7 @@ export const TopNav: React.FC<TopNavProps> = ({
 
           {/* Autocomplete Dropdown */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl bg-[#090f26]/95 backdrop-blur-2xl border border-cyan-500/30 shadow-2xl overflow-hidden z-50 divide-y divide-slate-800/80">
+            <div className="absolute top-full left-0 right-0 mt-1.5 rounded-2xl bg-[#090f26]/95 backdrop-blur-2xl border border-cyan-500/40 shadow-[0_0_25px_rgba(0,243,255,0.2)] overflow-hidden z-50 divide-y divide-slate-800/80">
               {suggestions.map((country) => (
                 <div
                   key={country.id}
@@ -150,7 +150,7 @@ export const TopNav: React.FC<TopNavProps> = ({
             type="button"
             onClick={onOpenAIChat}
             title="Tanya Analis Berita Global AI (Gemini 3.1 Pro & 3.5 Flash)"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 text-xs font-bold shadow-lg shadow-cyan-500/15 active:scale-95 transition"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 text-xs font-bold shadow-[0_0_15px_rgba(0,243,255,0.2)] hover:scale-105 active:scale-95 transition-all"
             aria-label="Analis Berita Global AI"
           >
             <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
@@ -163,7 +163,7 @@ export const TopNav: React.FC<TopNavProps> = ({
             type="button"
             onClick={onOpenNotifications}
             title="Pusat Pemberitahuan Berita"
-            className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-700/60 text-slate-300 hover:text-white flex items-center justify-center shadow-lg active:scale-92 transition"
+            className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#0a0e17]/80 backdrop-blur-xl border border-cyan-500/30 text-slate-300 hover:text-white hover:border-cyan-400 flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.1)] hover:scale-105 active:scale-95 transition-all"
             aria-label="Pemberitahuan"
           >
             <Bell className="w-4 h-4 text-cyan-400" />
@@ -179,7 +179,7 @@ export const TopNav: React.FC<TopNavProps> = ({
             type="button"
             onClick={onOpenProfile}
             title={`Profil: ${userProfile.name}`}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-cyan-500/40 hover:border-cyan-400 text-slate-200 flex items-center justify-center shadow-lg active:scale-92 transition text-base"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#0a0e17]/80 backdrop-blur-xl border border-cyan-500/40 hover:border-cyan-400 text-slate-200 flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.1)] hover:scale-105 active:scale-95 transition-all text-base"
             aria-label="Profil Pengguna"
           >
             <span>{userProfile.avatar || '🌐'}</span>
@@ -190,7 +190,7 @@ export const TopNav: React.FC<TopNavProps> = ({
             type="button"
             onClick={onToggleTheme}
             title={theme === 'dark' ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-700/60 text-slate-300 hover:text-white flex items-center justify-center shadow-lg active:scale-92 transition"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#0a0e17]/80 backdrop-blur-xl border border-cyan-500/30 text-slate-300 hover:text-white hover:border-cyan-400 flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.1)] hover:scale-105 active:scale-95 transition-all"
             aria-label="Tema Tampilan"
           >
             {theme === 'dark' ? (
@@ -203,12 +203,12 @@ export const TopNav: React.FC<TopNavProps> = ({
       </div>
 
       {/* Quick Navigation Category Bar */}
-      <div className="flex items-center justify-between gap-1.5 px-1 overflow-x-auto">
+      <div className="flex items-center justify-between gap-1.5 px-1 overflow-x-auto no-scrollbar">
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={onOpenAIChat}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-[11px] font-bold text-cyan-300 active:scale-95 transition shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-[11px] font-bold text-cyan-300 hover:scale-105 active:scale-95 transition-all shadow-[0_0_12px_rgba(0,243,255,0.25)]"
           >
             <Sparkles className="w-3 h-3 text-cyan-400" />
             <span>AI Analis</span>
@@ -217,7 +217,7 @@ export const TopNav: React.FC<TopNavProps> = ({
           <button
             type="button"
             onClick={onOpenForYou}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500/25 to-amber-500/25 hover:from-orange-500/35 hover:to-amber-500/35 border border-orange-500/40 text-[11px] font-bold text-orange-300 active:scale-95 transition shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500/25 to-amber-500/25 hover:from-orange-500/35 hover:to-amber-500/35 border border-orange-500/50 text-[11px] font-bold text-orange-300 hover:scale-105 active:scale-95 transition-all shadow-[0_0_12px_rgba(249,115,22,0.25)]"
           >
             <Sparkles className="w-3 h-3 text-orange-400" />
             <span>Untuk Anda</span>
@@ -226,7 +226,7 @@ export const TopNav: React.FC<TopNavProps> = ({
           <button
             type="button"
             onClick={onOpenCountryList}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900/75 backdrop-blur-md border border-slate-800 text-[11px] font-medium text-slate-300 hover:text-white active:scale-95 transition"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0a0e17]/80 backdrop-blur-md border border-cyan-500/20 text-[11px] font-medium text-slate-300 hover:text-white hover:border-cyan-400/40 hover:scale-105 active:scale-95 transition-all"
           >
             <List className="w-3 h-3 text-cyan-400" />
             <span>Katalog</span>
@@ -235,7 +235,7 @@ export const TopNav: React.FC<TopNavProps> = ({
           <button
             type="button"
             onClick={onOpenEconomicCalendar}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900/75 backdrop-blur-md border border-slate-800 text-[11px] font-medium text-slate-300 hover:text-white active:scale-95 transition"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0a0e17]/80 backdrop-blur-md border border-cyan-500/20 text-[11px] font-medium text-slate-300 hover:text-white hover:border-cyan-400/40 hover:scale-105 active:scale-95 transition-all"
           >
             <Calendar className="w-3 h-3 text-amber-400" />
             <span>Kalender</span>
@@ -244,7 +244,7 @@ export const TopNav: React.FC<TopNavProps> = ({
           <button
             type="button"
             onClick={onOpenSavedArticles}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900/75 backdrop-blur-md border border-slate-800 text-[11px] font-medium text-slate-300 hover:text-white active:scale-95 transition"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0a0e17]/80 backdrop-blur-md border border-cyan-500/20 text-[11px] font-medium text-slate-300 hover:text-white hover:border-cyan-400/40 hover:scale-105 active:scale-95 transition-all"
           >
             <Bookmark className="w-3 h-3 text-orange-400" />
             <span>Tersimpan</span>
@@ -253,7 +253,7 @@ export const TopNav: React.FC<TopNavProps> = ({
           <button
             type="button"
             onClick={onOpenProfile}
-            className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900/75 backdrop-blur-md border border-slate-800 text-[11px] font-medium text-slate-300 hover:text-white active:scale-95 transition"
+            className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0a0e17]/80 backdrop-blur-md border border-cyan-500/20 text-[11px] font-medium text-slate-300 hover:text-white hover:border-cyan-400/40 hover:scale-105 active:scale-95 transition-all"
           >
             <SlidersHorizontal className="w-3 h-3 text-purple-400" />
             <span>Preferensi</span>
@@ -262,7 +262,7 @@ export const TopNav: React.FC<TopNavProps> = ({
 
         {/* Status Indicator */}
         {autoRotate && (
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-[10px] font-semibold text-cyan-300 tracking-wide shrink-0">
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/35 text-[10px] font-semibold text-cyan-300 tracking-wide shrink-0 shadow-[0_0_10px_rgba(0,243,255,0.15)]">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
             <span>Berputar Otomatis</span>
           </span>
