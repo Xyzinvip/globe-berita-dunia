@@ -313,13 +313,14 @@ export const GeminiChatModal: React.FC<GeminiChatModalProps> = ({
   };
 
   const quickQuestions = [
+    'Ringkas berita hari ini',
+    'Apa dampak keputusan The Fed terhadap Rupiah?',
     activeCountry
-      ? `Apa tantangan geopolitik terbesar bagi ${activeCountry.nameId || activeCountry.name} tahun ini?`
-      : 'Apa berita geopolitik global terpanas saat ini?',
+      ? `Jelaskan situasi ekonomi & politik di ${activeCountry.nameId || activeCountry.name}`
+      : 'Analisis konflik geopolitik & ketahanan energi',
     activeArticle
-      ? `Jelaskan implikasi dari berita: "${activeArticle.title.slice(0, 50)}..."`
-      : 'Bagaimana tren suku bunga bank sentral dunia?',
-    'Fakta apa yang terkonfirmasi mengenai inovasi AI global?',
+      ? `Apa dampak berita "${activeArticle.title.slice(0, 40)}..." terhadap pasar global?`
+      : 'Fakta apa yang terkonfirmasi mengenai inovasi AI global?',
   ];
 
   if (!isOpen) return null;
