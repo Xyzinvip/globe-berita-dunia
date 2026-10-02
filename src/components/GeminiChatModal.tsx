@@ -183,8 +183,6 @@ export const GeminiChatModal: React.FC<GeminiChatModalProps> = ({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const currentRole = CHAT_ROLES.find((r) => r.id === selectedRole) || CHAT_ROLES[0];
 
   const contextDescription = useMemo(() => {
@@ -323,6 +321,8 @@ export const GeminiChatModal: React.FC<GeminiChatModalProps> = ({
       : 'Bagaimana tren suku bunga bank sentral dunia?',
     'Fakta apa yang terkonfirmasi mengenai inovasi AI global?',
   ];
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
