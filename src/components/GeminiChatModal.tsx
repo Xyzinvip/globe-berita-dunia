@@ -138,7 +138,7 @@ const WELCOME_MESSAGE: ChatMessage = {
   role: 'model',
   text: `Halo! Saya **Analis Berita Global AI** didukung Google Gemini.\nPilih peran analisis di atas, lalu ajukan pertanyaan apa pun seputar berita dan isu dunia!\n\n* **Analis Geopolitik** — Analisis strategis & konflik kawasan\n* **Editor Berita** — Rangkuman objektif & berimbang\n* **Fact-Checker** — Verifikasi fakta instan\n* **Ekonom Pasar** — Makroekonomi & komoditas`,
   timestamp: 'Baru saja',
-  modelUsed: 'gemini-3.5-flash',
+  modelUsed: 'gemini-3.8-flash',
 };
 
 export const GeminiChatModal: React.FC<GeminiChatModalProps> = ({
