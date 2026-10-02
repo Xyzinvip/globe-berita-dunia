@@ -56,12 +56,12 @@ export const CyberTelemetryHUD: React.FC<CyberTelemetryHUDProps> = ({
         {/* Top Telemetry Header */}
         <div className="flex items-center justify-between pb-2 mb-2 border-b border-cyan-500/25">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400 shadow-[0_0_8px_#00F3FF]" />
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500 shadow-[0_0_10px_#FF3B30]" />
             </span>
-            <div className="flex items-center gap-1.5 font-bold tracking-wider text-[10px] text-cyan-200">
-              <Crosshair className="w-3.5 h-3.5 text-cyan-400 animate-spin-slow" />
+            <div className="flex items-center gap-1.5 font-bold tracking-wider text-[10px] text-rose-300">
+              <Crosshair className="w-3.5 h-3.5 text-rose-400 animate-spin-slow" />
               <span>LOCK RETICLE // ACTIVE HUD</span>
             </div>
           </div>
