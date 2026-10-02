@@ -5,9 +5,11 @@ import worldAtlasData from 'world-atlas/countries-110m.json';
 import { CountryInfo } from '../types';
 import { getCountryInfo, COUNTRIES_DATA } from '../data/countries';
 import { CURATED_NEWS } from '../data/newsData';
+import { Compass } from 'lucide-react';
 import { CyberTelemetryHUD } from './CyberTelemetryHUD';
+import { EarthquakeItem } from '../services/earthquakeService';
 
-interface GlobeCanvasProps {
+export interface GlobeCanvasProps {
   selectedCountry: CountryInfo | null;
   onSelectCountry: (country: CountryInfo | null) => void;
   autoRotate: boolean;
@@ -16,6 +18,39 @@ interface GlobeCanvasProps {
   filterCategory?: string;
   filterTimeRange?: string;
   tourCountry?: CountryInfo | null;
+  isTourActive?: boolean;
+  onToggleNewsTour?: () => void;
+  showTerminator?: boolean;
+  onToggleTerminator?: () => void;
+  showEarthquakes?: boolean;
+  onToggleEarthquakes?: () => void;
+  earthquakes?: EarthquakeItem[];
+}
+
+export function getLocalCountryTime(lon: number): string {
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const offsetHours = Math.round(lon / 15);
+  const countryTime = new Date(utc + 3600000 * offsetHours);
+  const hours = String(countryTime.getHours()).padStart(2, '0');
+  const minutes = String(countryTime.getMinutes()).padStart(2, '0');
+  const gmtSign = offsetHours >= 0 ? `+${offsetHours}` : `${offsetHours}`;
+  return `${hours}:${minutes} (UTC${gmtSign})`;
+}
+
+function getSunCoordinates(date: Date = new Date()): { sun: [number, number]; antiSun: [number, number] } {
+  const dayOfYear =
+    (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) -
+      Date.UTC(date.getFullYear(), 0, 0)) /
+    86400000;
+  const declination = -23.44 * Math.cos(((2 * Math.PI) / 365) * (dayOfYear + 10));
+  const utcHours = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+  const sunLon = (12 - utcHours) * 15;
+  const antiSunLon = sunLon > 0 ? sunLon - 180 : sunLon + 180;
+  return {
+    sun: [sunLon, declination],
+    antiSun: [antiSunLon, -declination],
+  };
 }
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -35,6 +70,13 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
   filterCategory,
   filterTimeRange,
   tourCountry,
+  isTourActive = false,
+  onToggleNewsTour,
+  showTerminator = true,
+  onToggleTerminator,
+  showEarthquakes = false,
+  onToggleEarthquakes,
+  earthquakes = [],
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const starsRef = useRef<HTMLCanvasElement | null>(null);
@@ -57,6 +99,7 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
     flag: string;
     articleCount: number;
     topCategory: string;
+    localTime?: string;
     x: number;
     y: number;
   } | null>(null);
@@ -383,6 +426,30 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         }
       }
 
+      // --- Real-time Day-Night Terminator Line & Night Hemisphere (Fitur 5) ---
+      if (showTerminator) {
+        const { sun, antiSun } = getSunCoordinates();
+        const nightCircle = d3.geoCircle().center(antiSun).radius(90)();
+        const terminatorCircle = d3.geoCircle().center(sun).radius(90)();
+
+        // Shaded cyber night hemisphere
+        ctx.save();
+        ctx.beginPath();
+        path(nightCircle);
+        ctx.fillStyle = theme === 'dark' ? 'rgba(2, 6, 23, 0.44)' : 'rgba(15, 23, 42, 0.22)';
+        ctx.fill();
+
+        // Glowing twilight boundary line (Golden-amber glow)
+        ctx.beginPath();
+        path(terminatorCircle);
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.42)';
+        ctx.lineWidth = 1.3;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+      }
+
       // --- Spatial News Wave / Pulse Layer (Fase 3: Categorical colors & dynamic pulse) ---
       const curRot = proj.rotate();
       const centerLng = -curRot[0];
@@ -434,6 +501,42 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
           ctx.arc(pt[0], pt[1], 1.2, 0, Math.PI * 2);
           ctx.fillStyle = '#ffffff';
           ctx.fill();
+        }
+      }
+
+      // --- Live Real-Time Earthquakes Layer (USGS Feed) ---
+      if (showEarthquakes && earthquakes && earthquakes.length > 0) {
+        for (let i = 0; i < earthquakes.length; i++) {
+          const eq = earthquakes[i];
+          const dist = d3.geoDistance(eq.coords, [centerLng, centerLat]);
+          if (dist > Math.PI / 2 - 0.08) continue; // Behind visible hemisphere
+          const pt = proj(eq.coords);
+          if (!pt || !isFinite(pt[0]) || !isFinite(pt[1])) continue;
+
+          // Color by magnitude: M6+ Red, M5+ Orange, M<5 Amber
+          const mag = eq.mag;
+          const eqColor = mag >= 6 ? '#ef4444' : mag >= 5 ? '#f97316' : '#fbbf24';
+          const rBase = Math.max(3, mag * 2.2);
+
+          // Pulsing seismic shockwave ring
+          const eqPhase = ((timestamp / 1600) + (i * 0.12)) % 1;
+          const eqRing = rBase + eqPhase * 16;
+          const eqAlpha = (1 - eqPhase) * 0.8;
+
+          ctx.beginPath();
+          ctx.arc(pt[0], pt[1], eqRing, 0, Math.PI * 2);
+          ctx.strokeStyle = hexToRgba(eqColor, eqAlpha);
+          ctx.lineWidth = 1.3;
+          ctx.stroke();
+
+          // Epicenter marker
+          ctx.beginPath();
+          ctx.arc(pt[0], pt[1], 2.4, 0, Math.PI * 2);
+          ctx.fillStyle = eqColor;
+          ctx.shadowColor = eqColor;
+          ctx.shadowBlur = 8;
+          ctx.fill();
+          ctx.shadowBlur = 0;
         }
       }
 
@@ -553,7 +656,16 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
       ctx.shadowBlur = 0;
       ctx.globalAlpha = 1;
     },
-    [selectedCountry, scaleFactor, colors, newsPulseLocations, filterCategory]
+    [
+      selectedCountry,
+      scaleFactor,
+      colors,
+      newsPulseLocations,
+      filterCategory,
+      showTerminator,
+      showEarthquakes,
+      earthquakes,
+    ]
   );
 
   // Smooth rotation animation loop
@@ -669,6 +781,7 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
           flag: cInfo.flag,
           articleCount: newsItem ? newsItem.articleCount : 0,
           topCategory: newsItem ? newsItem.category : 'Global',
+          localTime: getLocalCountryTime(cInfo.center[0]),
           x: e.clientX,
           y: e.clientY,
         });
@@ -782,7 +895,7 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         onWheel={handleWheel}
       />
 
-      {/* Interactive Controls Overlay (Reset Zoom & Tour/Rotate) */}
+      {/* Interactive Controls Overlay (Reset Zoom, News Tour Mode, & Layer Toggles) */}
       <div className="absolute bottom-20 right-4 sm:right-6 flex flex-col gap-2.5 z-20">
         {/* Reset Zoom */}
         <button
@@ -797,22 +910,60 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
           <span className="text-xs font-bold tracking-tight">1x</span>
         </button>
 
-        {/* Toggle Auto Rotation */}
+        {/* Mode Tur Berita (News Tour Mode) */}
         <button
-          onClick={onToggleAutoRotate}
-          title={autoRotate ? 'Hentikan Putaran' : 'Putar Otomatis'}
+          onClick={onToggleNewsTour || onToggleAutoRotate}
+          title={isTourActive ? 'Hentikan Mode Tur Berita' : 'Mulai Mode Tur Berita Sinematik'}
           className={`w-10 h-10 rounded-2xl backdrop-blur-xl border transition-all flex items-center justify-center shadow-lg active:scale-92 ${
-            autoRotate
-              ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 shadow-[0_0_20px_rgba(0,243,255,0.3)]'
+            isTourActive
+              ? 'bg-emerald-500/25 border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(52,211,153,0.35)]'
               : 'bg-[#0a0e17]/80 border-cyan-500/20 text-slate-400 hover:text-slate-200 hover:border-cyan-500/40'
           }`}
         >
-          <svg className={`w-4 h-4 ${autoRotate ? 'animate-spin' : ''}`} style={{ animationDuration: '6s' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 12a9 9 0 1 1-3-6.7" />
-            <path d="M21 3v6h-6" />
-          </svg>
+          <Compass
+            className={`w-4 h-4 ${isTourActive ? 'animate-spin' : ''}`}
+            style={{ animationDuration: '8s' }}
+          />
         </button>
+
+        {/* Layer Toggle: Day-Night Terminator Line */}
+        {onToggleTerminator && (
+          <button
+            onClick={onToggleTerminator}
+            title={showTerminator ? 'Sembunyikan Garis Siang-Malam' : 'Tampilkan Garis Siang-Malam (Terminator)'}
+            className={`w-10 h-10 rounded-2xl backdrop-blur-xl border transition-all flex items-center justify-center shadow-lg active:scale-92 ${
+              showTerminator
+                ? 'bg-amber-500/25 border-amber-400 text-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.3)]'
+                : 'bg-[#0a0e17]/80 border-cyan-500/20 text-slate-400 hover:text-slate-200 hover:border-cyan-500/40'
+            }`}
+          >
+            <span className="text-sm select-none">🌓</span>
+          </button>
+        )}
+
+        {/* Layer Toggle: USGS Earthquakes */}
+        {onToggleEarthquakes && (
+          <button
+            onClick={onToggleEarthquakes}
+            title={showEarthquakes ? 'Sembunyikan Gempa (USGS)' : 'Tampilkan Data Gempa Real-Time (USGS)'}
+            className={`w-10 h-10 rounded-2xl backdrop-blur-xl border transition-all flex items-center justify-center shadow-lg active:scale-92 ${
+              showEarthquakes
+                ? 'bg-rose-500/25 border-rose-400 text-rose-300 shadow-[0_0_20px_rgba(244,63,94,0.35)]'
+                : 'bg-[#0a0e17]/80 border-cyan-500/20 text-slate-400 hover:text-slate-200 hover:border-cyan-500/40'
+            }`}
+          >
+            <span className="text-sm select-none">🌋</span>
+          </button>
+        )}
       </div>
+
+      {/* USGS Official Attribution Badge when Earthquake layer is on */}
+      {showEarthquakes && (
+        <div className="fixed top-20 left-4 sm:left-20 z-20 px-3 py-1.5 rounded-xl bg-[#0a0e17]/90 backdrop-blur-xl border border-rose-500/40 text-[10px] text-rose-300 font-mono shadow-[0_0_20px_rgba(244,63,94,0.25)] flex items-center gap-1.5 animate-in fade-in duration-200 pointer-events-auto">
+          <span>🌋</span>
+          <span>Data Gempa Terkini: <strong>USGS Earthquake Hazards Program</strong></span>
+        </div>
+      )}
 
       {/* Cyber-Typing HUD Telemetry Overlay on Country Selection */}
       {selectedCountry && !hudDismissed && (
@@ -822,21 +973,28 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         />
       )}
 
-      {/* Hover Tooltip on Country / Hotspot (Fase 3) */}
+      {/* Hover Tooltip on Country / Hotspot (Fase 3: Nama, Jumlah Berita, & Jam Dunia) */}
       {hoveredCountry && !selectedCountry && (
         <div
           style={{
-            left: Math.min(window.innerWidth - 180, hoveredCountry.x + 14),
-            top: Math.max(76, hoveredCountry.y - 44),
+            left: Math.min(window.innerWidth - 195, hoveredCountry.x + 14),
+            top: Math.max(76, hoveredCountry.y - 48),
           }}
-          className="fixed z-40 pointer-events-none px-3 py-1.5 rounded-xl bg-[#070e1c]/95 backdrop-blur-xl border border-cyan-400/40 shadow-[0_0_20px_rgba(0,243,255,0.25)] text-xs text-white flex items-center gap-2 select-none animate-in fade-in zoom-in-95 duration-100"
+          className="fixed z-40 pointer-events-none px-3.5 py-2 rounded-xl bg-[#070e1c]/95 backdrop-blur-xl border border-cyan-400/40 shadow-[0_0_20px_rgba(0,243,255,0.25)] text-xs text-white flex items-center gap-2.5 select-none animate-in fade-in zoom-in-95 duration-100"
         >
-          <span className="text-base select-none">{hoveredCountry.flag}</span>
+          <span className="text-xl select-none">{hoveredCountry.flag}</span>
           <div>
-            <p className="font-bold text-xs text-white leading-tight">{hoveredCountry.nameId}</p>
-            <p className="text-[10px] text-cyan-300 font-mono">
+            <div className="flex items-center gap-1.5">
+              <p className="font-bold text-xs text-white leading-tight">{hoveredCountry.nameId}</p>
+              {hoveredCountry.localTime && (
+                <span className="text-[10px] text-amber-300 font-mono px-1 py-0.2 rounded bg-amber-500/15 border border-amber-500/30">
+                  {hoveredCountry.localTime}
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-cyan-300 font-mono mt-0.5">
               {hoveredCountry.articleCount > 0
-                ? `${hoveredCountry.articleCount} Berita · ${hoveredCountry.topCategory}`
+                ? `${hoveredCountry.articleCount} Berita Aktif · ${hoveredCountry.topCategory}`
                 : 'Belum ada kabar berita'}
             </p>
           </div>
