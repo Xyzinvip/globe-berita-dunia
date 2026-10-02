@@ -1,5 +1,6 @@
 import { NewsArticle, UserProfile, NewsCategory } from '../types';
 import { CURATED_NEWS, FALLBACK_WORLD_NEWS } from '../data/newsData';
+import { getArticleThumbnail } from './newsImageEngine';
 
 // Map between Indonesian NewsCategory and backend/API categories
 const CATEGORY_MAP: Record<string, string> = {
@@ -55,7 +56,7 @@ export async function fetchLiveNews(params: {
 
 function normalizeArticle(item: any): NewsArticle {
   const cat = mapToNewsCategory(item.category);
-  return {
+  const article: NewsArticle = {
     id: item.id || `live-${Math.random().toString(36).substring(2, 9)}`,
     countryName: item.countryName || 'Global',
     countryCode: item.countryCode || 'GL',
@@ -82,11 +83,16 @@ function normalizeArticle(item: any): NewsArticle {
           'Dampak terhadap stabilitas kawasan dan sektor terkait terus dipantau.',
           'Rincian dan tindak lanjut tersedia pada laporan resmi sumber publikasi.'
         ],
-    imageUrl: item.imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80',
+    imageUrl: '',
     sentiment: item.sentiment || (item.isBreaking ? 'urgent' : 'neutral'),
     author: item.author || item.source,
     isBreaking: !!item.isBreaking
   };
+  article.imageUrl = getArticleThumbnail({
+    ...article,
+    imageUrl: item.imageUrl || ''
+  });
+  return article;
 }
 
 function mapToNewsCategory(cat: string): NewsCategory {
