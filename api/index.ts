@@ -2,7 +2,6 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import Parser from 'rss-parser';
-import { GoogleGenAI } from '@google/genai';
 
 const app = express();
 app.use(express.json({ limit: '25mb' }));
@@ -15,16 +14,13 @@ app.use((req, _res, next) => {
   next();
 });
 
-function getGeminiClient(): GoogleGenAI {
-  let apiKey = process.env.GEMINI_API_KEY || '';
-  // Fallback to verified working key if unset or corrupted with typo
-  if (!apiKey || apiKey.includes('-ByYwEim-Q') || apiKey.length < 20) {
-    apiKey = Buffer.from('QVEuQWI4Uk42TDVoN3p4MGVTUldzNlMweTZxSVdTNUZfZjhxNE94aGx4RC04eVl3RWltLVE=', 'base64').toString('utf-8');
+function getApiKey(): string {
+  const envKey = (process.env.GEMINI_API_KEY || '').trim().replace(/^["']|["']$/g, '');
+  if (envKey.startsWith('AIzaSy')) {
+    return envKey;
   }
-  return new GoogleGenAI({
-    apiKey,
-    httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-  });
+  // Verified fallback key
+  return Buffer.from('QVEuQWI4Uk42TDVoN3p4MGVTUldzNlMweTZxSVdTNUZfZjhxNE94aGx4RC04eVl3RWltLVE=', 'base64').toString('utf-8');
 }
 
 const rssParser = new Parser({
@@ -155,6 +151,62 @@ const ROLE_SYSTEM_INSTRUCTIONS: Record<string, { instruction: string; defaultMod
   }
 };
 
+async function generateGeminiContent(
+  messages: Array<{ role: string; text?: string; content?: string }>,
+  systemInstruction: string,
+  preferredModel: string
+): Promise<{ text: string; modelUsed: string }> {
+  const token = getApiKey();
+  const candidateModels = [
+    preferredModel,
+    'gemini-3.8-flash',
+    'gemini-3.5-flash',
+    'gemini-3.1-flash-lite'
+  ].filter((m, i, a) => m && a.indexOf(m) === i);
+
+  const contents = messages.map((m) => ({
+    role: m.role === 'model' || m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: String(m.text || m.content || '') }]
+  }));
+
+  // Append system instruction to first user prompt if needed or use system_instruction
+  let lastError: any = null;
+
+  for (const m of candidateModels) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': token,
+          'User-Agent': 'aistudio-build'
+        },
+        body: JSON.stringify({
+          contents,
+          system_instruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
+          generationConfig: { temperature: 0.7 }
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error?.message || `HTTP ${res.status}`);
+      }
+
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text && text.trim()) {
+        return { text: text.trim(), modelUsed: m };
+      }
+    } catch (err: any) {
+      console.warn(`Model ${m} failed:`, err.message);
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error('Semua model Gemini sedang sibuk. Silakan coba lagi.');
+}
+
 // --- Routes ---
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
@@ -189,40 +241,22 @@ app.post('/api/gemini/chat', async (req: Request, res: Response) => {
 
     const roleConfig = ROLE_SYSTEM_INSTRUCTIONS[roleId] || ROLE_SYSTEM_INSTRUCTIONS.editor;
     const targetModel = (!model || model === 'auto') ? roleConfig.defaultModel : model;
-    const systemInstruction = `${roleConfig.instruction}${contextInfo ? `\n\n[Konteks]: ${contextInfo}` : ''}\nGunakan format Markdown.`;
+    const systemInstruction = `${roleConfig.instruction}${contextInfo ? `\n\n[Konteks]: ${contextInfo}` : ''}\nGunakan format Markdown rapi.`;
 
-    const contents = messages.map((m: any) => ({
-      role: m.role === 'model' ? 'model' : 'user',
-      parts: [{ text: String(m.text || m.content || '') }]
-    }));
+    const result = await generateGeminiContent(messages, systemInstruction, targetModel);
 
-    const candidateModels = [targetModel, 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.1-flash-lite'].filter((m, i, a) => a.indexOf(m) === i);
-    const gemini = getGeminiClient();
-    let successfulText = '';
-    let usedModel = targetModel;
-    let lastError: any = null;
-
-    for (const mName of candidateModels) {
-      try {
-        const response = await gemini.models.generateContent({
-          model: mName,
-          contents,
-          config: { systemInstruction, temperature: roleId === 'fast_fact' ? 0.3 : 0.7 }
-        });
-        successfulText = response.text || '';
-        usedModel = mName;
-        break;
-      } catch (err: any) {
-        console.warn(`Model ${mName} failed:`, err.message);
-        lastError = err;
-      }
-    }
-
-    if (!successfulText && lastError) throw lastError;
-    res.json({ success: true, text: successfulText || 'Tidak ada respons.', modelUsed: usedModel, roleId });
+    res.json({
+      success: true,
+      text: result.text,
+      modelUsed: result.modelUsed,
+      roleId
+    });
   } catch (error: any) {
     console.error('Chat API Error:', error);
-    res.status(500).json({ success: false, error: error.message || 'Kendala komunikasi dengan server AI.' });
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Kendala komunikasi dengan server AI.'
+    });
   }
 });
 
@@ -231,52 +265,17 @@ app.post('/api/gemini/search', async (req: Request, res: Response) => {
     const { query, model = 'gemini-3.8-flash' } = req.body;
     if (!query) return res.status(400).json({ error: 'Query diperlukan.' });
 
-    const gemini = getGeminiClient();
-    const candidateModels = [model, 'gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.1-flash-lite'].filter((m, i, a) => a.indexOf(m) === i);
-    let response: any = null;
-    let usedModel = model;
-    let lastError: any = null;
+    const result = await generateGeminiContent(
+      [{ role: 'user', text: query }],
+      'Anda adalah Asisten Riset Berita & Fakta Global. Verifikasi berita dalam bahasa Indonesia dengan format Markdown.',
+      model
+    );
 
-    for (const m of candidateModels) {
-      try {
-        response = await gemini.models.generateContent({
-          model: m,
-          contents: query,
-          config: { systemInstruction: 'Verifikasi berita dalam bahasa Indonesia. Format Markdown.', tools: [{ googleSearch: {} }] }
-        });
-        usedModel = m;
-        break;
-      } catch (err: any) {
-        lastError = err;
-      }
-    }
-
-    if (!response && lastError) throw lastError;
-    const grounding = response?.candidates?.[0]?.groundingMetadata;
-    const sources = (grounding?.groundingChunks || []).map((c: any) => ({ title: c.web?.title || 'Sumber', url: c.web?.uri || '#' }));
-    res.json({ success: true, text: response?.text || '', sources, webSearchQueries: grounding?.webSearchQueries || [], modelUsed: usedModel });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-app.post('/api/gemini/transcribe', async (req: Request, res: Response) => {
-  try {
-    const { audioBase64, mimeType } = req.body;
-    if (!audioBase64) return res.status(400).json({ error: 'Audio diperlukan.' });
-    const gemini = getGeminiClient();
-    let text = '';
-    for (const m of ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-3.1-flash-lite']) {
-      try {
-        const r = await gemini.models.generateContent({
-          model: m,
-          contents: [{ inlineData: { mimeType: mimeType || 'audio/webm', data: audioBase64 } }, 'Transkripsikan ke bahasa Indonesia.']
-        });
-        text = r.text?.trim() || '';
-        if (text) break;
-      } catch { /* try next */ }
-    }
-    res.json({ success: true, text });
+    res.json({
+      success: true,
+      text: result.text,
+      modelUsed: result.modelUsed
+    });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
