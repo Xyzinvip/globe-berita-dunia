@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flame, ChevronRight, ChevronDown, ChevronUp, Globe2, Clock } from 'lucide-react';
+import { Flame, ChevronRight, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 import { NewsArticle } from '../types';
 
 interface TrendingNewsPanelProps {
@@ -50,6 +50,7 @@ export const TrendingNewsPanel: React.FC<TrendingNewsPanelProps> = ({
   onSelectArticle,
   onFlyToCountryName,
 }) => {
+  // Collapsed by default on small mobile screens to keep view clean, expanded on desktop
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Take top 5 news articles
@@ -64,29 +65,40 @@ export const TrendingNewsPanel: React.FC<TrendingNewsPanelProps> = ({
 
   return (
     <aside
-      className={`fixed z-20 transition-all duration-300 select-none pointer-events-auto ${
-        // Desktop placement: right side
-        // Mobile placement: top-right or collapsible bottom
-        'top-[calc(env(safe-area-inset-top,0px)+68px)] right-3 sm:right-6 max-w-[calc(100vw-24px)] sm:max-w-xs w-full'
+      className={`fixed z-25 transition-all duration-300 select-none pointer-events-auto ${
+        // Mobile layout: Bottom Sheet docked at bottom
+        // Desktop layout (sm:): Floating glassmorphism card on the top right
+        'bottom-0 left-0 right-0 sm:bottom-auto sm:left-auto sm:top-[calc(env(safe-area-inset-top,0px)+72px)] sm:right-6 w-full sm:max-w-xs'
       }`}
       aria-label="Berita Sedang Hangat"
     >
-      <div className="rounded-2xl bg-[#0a0e17]/85 backdrop-blur-xl border border-cyan-500/25 shadow-[0_0_20px_rgba(0,243,255,0.1)] overflow-hidden transition-all duration-200 hover:border-cyan-500/40">
+      <div className="rounded-t-3xl sm:rounded-2xl bg-[#0a0e17]/90 backdrop-blur-2xl border-t border-x sm:border border-cyan-500/30 shadow-[0_0_25px_rgba(0,243,255,0.12)] overflow-hidden transition-all duration-200 hover:border-cyan-500/40">
+        {/* Mobile Drag / Swipe Pill Handle */}
+        <div
+          className="sm:hidden pt-2 pb-0.5 flex justify-center cursor-pointer"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
+          <div className="w-10 h-1 rounded-full bg-slate-600/80 hover:bg-cyan-400 transition-colors" />
+        </div>
+
         {/* Header with Collapse Toggle */}
         <button
           type="button"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="w-full px-3.5 py-2.5 flex items-center justify-between text-left group"
+          className="w-full px-4 sm:px-3.5 py-2.5 flex items-center justify-between text-left group"
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-2">
             <span className="p-1 rounded-lg bg-orange-500/20 text-orange-400 shadow-[0_0_10px_rgba(249,115,22,0.3)]">
               <Flame className="w-4 h-4 animate-pulse text-orange-400" />
             </span>
             <div>
-              <h3 className="text-xs font-bold text-white tracking-wide group-hover:text-cyan-300 transition-colors">
-                Sedang Hangat
+              <h3 className="text-xs font-bold text-white tracking-wide group-hover:text-cyan-300 transition-colors flex items-center gap-1.5">
+                <span>Sedang Hangat</span>
+                <span className="sm:hidden text-[10px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-300 font-mono">
+                  {trendingArticles.length} Isu
+                </span>
               </h3>
-              <p className="text-[10px] text-slate-400 font-mono">
+              <p className="text-[10px] text-slate-400 font-mono hidden sm:block">
                 {trendingArticles.length} Isu Teratas Dunia
               </p>
             </div>
@@ -94,16 +106,16 @@ export const TrendingNewsPanel: React.FC<TrendingNewsPanelProps> = ({
 
           <div className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 group-hover:text-white transition">
             {isCollapsed ? (
-              <ChevronDown className="w-4 h-4" />
-            ) : (
               <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
             )}
           </div>
         </button>
 
         {/* Content list when expanded */}
         {!isCollapsed && (
-          <div className="px-3 pb-3 space-y-1.5 border-t border-cyan-500/15 pt-2">
+          <div className="px-3 pb-3 sm:pb-3 space-y-1.5 border-t border-cyan-500/15 pt-2 max-h-[50vh] sm:max-h-[60vh] overflow-y-auto">
             {trendingArticles.length === 0 ? (
               <p className="text-xs text-slate-400 py-3 text-center">
                 Memuat isu terhangat...
