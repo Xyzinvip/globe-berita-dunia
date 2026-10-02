@@ -1,6 +1,6 @@
 // Gemini AI Client Service
 
-export type GeminiModelId = 'gemini-3.1-pro-preview' | 'gemini-3.5-flash' | 'gemini-3.1-flash-lite' | 'auto';
+export type GeminiModelId = 'gemini-3.8-flash' | 'gemini-3.5-flash' | 'gemini-3.1-flash-lite' | 'auto';
 
 export type ChatRoleId = 'geopolitics' | 'editor' | 'fast_fact' | 'economy';
 
@@ -21,8 +21,8 @@ export const CHAT_ROLES: ChatRole[] = [
     name: 'Analis Geopolitik',
     tagline: 'Analisis Strategis & Konflik Global',
     icon: 'ShieldAlert',
-    badge: 'Tugas Kompleks',
-    defaultModel: 'gemini-3.1-pro-preview',
+    badge: 'Analisis Mendalam',
+    defaultModel: 'gemini-3.8-flash',
     description: 'Menganalisis dampak geostrategis, pergeseran hegemoni, aliansi pertahanan, dan dinamika perbatasan internasional.',
     samplePrompt: 'Analisis pergeseran kekuatan militer dan aliansi strategis di kawasan Indo-Pasifik.'
   },
@@ -31,8 +31,8 @@ export const CHAT_ROLES: ChatRole[] = [
     name: 'Editor Berita Dunia',
     tagline: 'Jurnalisme Objektif & Berimbang',
     icon: 'Newspaper',
-    badge: 'Tugas Umum',
-    defaultModel: 'gemini-3.5-flash',
+    badge: 'Redaksi Berita',
+    defaultModel: 'gemini-3.8-flash',
     description: 'Menyajikan verifikasi berita internasional dari berbagai sudut pandang media terkemuka dunia dengan gaya redaksi kredibel.',
     samplePrompt: 'Rangkum perkembangan diplomasi damai dan bantuan kemanusiaan terkini.'
   },
@@ -41,7 +41,7 @@ export const CHAT_ROLES: ChatRole[] = [
     name: 'Fact-Checker Kilat',
     tagline: 'Verifikasi Fakta & Kilas Cepat',
     icon: 'Zap',
-    badge: 'Respons Super Cepat',
+    badge: 'Respons Kilat',
     defaultModel: 'gemini-3.1-flash-lite',
     description: 'Klarifikasi fakta, keabsahan klaim berita, dan rangkuman poin-poin penting dalam tempo kilat to-the-point.',
     samplePrompt: 'Verifikasi 3 fakta terpenting dari peristiwa yang sedang viral hari ini.'
@@ -51,8 +51,8 @@ export const CHAT_ROLES: ChatRole[] = [
     name: 'Ekonom Pasar Global',
     tagline: 'Makroekonomi, Saham & Mata Uang',
     icon: 'TrendingUp',
-    badge: 'Analisis Pasar',
-    defaultModel: 'gemini-3.1-pro-preview',
+    badge: 'Analisis Finansial',
+    defaultModel: 'gemini-3.8-flash',
     description: 'Kajian dampak suku bunga acuan bank sentral, komoditas energi (minyak/gas), rantai pasok chip, dan inflasi.',
     samplePrompt: 'Bagaimana tren suku bunga global mempengaruhi nilai tukar mata uang berkembang?'
   }
@@ -63,19 +63,19 @@ export const MODEL_OPTIONS: { id: GeminiModelId; label: string; tag: string; des
     id: 'auto',
     label: 'Otomatis (Optimal)',
     tag: 'Rekomendasi',
-    description: 'Memilih otomatis model paling tepat berdasarkan peran dan kompleksitas topik'
+    description: 'Memilih otomatis model paling tepat berdasarkan peran dan topik'
   },
   {
-    id: 'gemini-3.1-pro-preview',
-    label: 'Gemini 3.1 Pro',
-    tag: 'Tugas Kompleks',
-    description: 'Penalaran mendalam untuk geopolitik, kalkulasi risiko, dan skenario komprehensif'
+    id: 'gemini-3.8-flash',
+    label: 'Gemini 3.8 Flash',
+    tag: 'Generasi Terbaru',
+    description: 'Model tercanggih dan tercepat untuk penalaran berita dunia'
   },
   {
     id: 'gemini-3.5-flash',
     label: 'Gemini 3.5 Flash',
-    tag: 'Tugas Umum',
-    description: 'Keseimbangan prima antara kecerdasan wawasan jurnalistik dan kecepatan respons'
+    tag: 'Standar Stabil',
+    description: 'Keseimbangan prima antara wawasan jurnalistik dan responsivitas'
   },
   {
     id: 'gemini-3.1-flash-lite',
