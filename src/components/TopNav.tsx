@@ -3,7 +3,6 @@ import {
   Search,
   Moon,
   Sun,
-  Smartphone,
   Calendar,
   Bookmark,
   List,
@@ -15,7 +14,6 @@ import {
 } from 'lucide-react';
 import { CountryInfo, UserProfile } from '../types';
 import { COUNTRIES_DATA } from '../data/countries';
-import { usePWAInstall } from '../hooks/usePWAInstall';
 
 interface TopNavProps {
   onSelectCountry: (country: CountryInfo) => void;
@@ -24,7 +22,6 @@ interface TopNavProps {
   onOpenEconomicCalendar: () => void;
   onOpenSavedArticles: () => void;
   onOpenCountryList: () => void;
-  onOpenAPKModal: () => void;
   onOpenProfile: () => void;
   onOpenNotifications: () => void;
   onOpenForYou: () => void;
@@ -41,7 +38,6 @@ export const TopNav: React.FC<TopNavProps> = ({
   onOpenEconomicCalendar,
   onOpenSavedArticles,
   onOpenCountryList,
-  onOpenAPKModal,
   onOpenProfile,
   onOpenNotifications,
   onOpenForYou,
@@ -53,7 +49,6 @@ export const TopNav: React.FC<TopNavProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
-  const { isInstalled } = usePWAInstall();
 
   const allCountries = Object.values(COUNTRIES_DATA);
 
@@ -188,19 +183,6 @@ export const TopNav: React.FC<TopNavProps> = ({
             aria-label="Profil Pengguna"
           >
             <span>{userProfile.avatar || '🌐'}</span>
-          </button>
-
-          {/* APK Install Badge / Button */}
-          <button
-            type="button"
-            onClick={onOpenAPKModal}
-            title="Instalasi APK Mobile Standalone"
-            className="flex items-center gap-1 px-2.5 py-2 rounded-2xl bg-gradient-to-r from-cyan-500/20 to-orange-500/20 hover:from-cyan-500/30 hover:to-orange-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-bold shadow-lg shadow-cyan-500/10 active:scale-95 transition"
-          >
-            <Smartphone className="w-4 h-4 text-orange-400 shrink-0" />
-            <span className="text-[11px] font-extrabold tracking-tight hidden sm:inline">
-              {isInstalled ? 'APK Aktif' : 'Pasang APK'}
-            </span>
           </button>
 
           {/* Theme Toggle */}
