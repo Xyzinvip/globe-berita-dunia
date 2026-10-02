@@ -205,9 +205,9 @@ export const CountryNewsSheet: React.FC<CountryNewsSheetProps> = ({
         <div className="px-4 py-1.5 flex items-center justify-between text-[11px] text-cyan-300 bg-cyan-950/30 border-y border-cyan-500/15">
           <span className="flex items-center gap-1">
             <Sparkles className="w-3 h-3 text-cyan-400" />
-            <span>Mode Native APK: Berita dibaca langsung tanpa keluar app</span>
+            <span>Mode Baca Langsung: Berita disajikan tanpa keluar portal</span>
           </span>
-          <span className="font-bold text-orange-400">In-App</span>
+          <span className="font-bold text-cyan-400">Live</span>
         </div>
 
         {/* Tab 1: News Feed */}
