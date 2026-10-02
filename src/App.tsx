@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { GlobeCanvas } from './components/GlobeCanvas';
 import { TopNav } from './components/TopNav';
 import { LeftNavRail } from './components/LeftNavRail';
@@ -18,12 +18,14 @@ import { PersonalizedFeedView } from './components/PersonalizedFeedView';
 import { InAppPushBanner } from './components/InAppPushBanner';
 import { GeminiChatModal } from './components/GeminiChatModal';
 import { AIAssistantWidget } from './components/AIAssistantWidget';
+import { DailyBriefingModal } from './components/DailyBriefingModal';
 import { CountryInfo, NewsArticle, UserProfile } from './types';
 import { getCountryInfo } from './data/countries';
 import { getNewsForCountry, CURATED_NEWS, FALLBACK_WORLD_NEWS } from './data/newsData';
 import { getUserProfile, getNotifications } from './utils/storage';
 import { notificationService } from './services/notificationService';
 import { fetchLiveNews } from './services/newsApi';
+import { fetchUSGSEarthquakes, EarthquakeItem } from './services/earthquakeService';
 
 const TOUR_COUNTRIES = [
   'Indonesia',
@@ -50,7 +52,13 @@ export default function App() {
   const [isTourActive, setIsTourActive] = useState<boolean>(false);
   const [tourStopIndex, setTourStopIndex] = useState<number>(0);
 
+  // Live Data Layers (Fitur 5)
+  const [showTerminator, setShowTerminator] = useState<boolean>(true);
+  const [showEarthquakes, setShowEarthquakes] = useState<boolean>(false);
+  const [earthquakes, setEarthquakes] = useState<EarthquakeItem[]>([]);
+
   // Modals & views
+  const [showDailyBriefing, setShowDailyBriefing] = useState<boolean>(false);
   const [showGeminiChat, setShowGeminiChat] = useState<boolean>(false);
   const [showEconomicCalendar, setShowEconomicCalendar] = useState<boolean>(false);
   const [showSavedArticles, setShowSavedArticles] = useState<boolean>(false);
@@ -103,6 +111,69 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // Fetch earthquakes when layer is toggled on
+  useEffect(() => {
+    if (showEarthquakes && earthquakes.length === 0) {
+      fetchUSGSEarthquakes().then((data) => {
+        if (data && data.length > 0) setEarthquakes(data);
+      });
+    }
+  }, [showEarthquakes, earthquakes.length]);
+
+  // Autonomous Screen Saver: Auto-trigger News Tour when idle for 28 seconds
+  useEffect(() => {
+    let idleTimer: NodeJS.Timeout;
+
+    const resetIdleTimer = () => {
+      clearTimeout(idleTimer);
+      // Only schedule idle tour when no modals, sheets, or readers are open
+      if (
+        !selectedCountry &&
+        !selectedArticle &&
+        !showDailyBriefing &&
+        !showGeminiChat &&
+        !showProfileModal &&
+        !showNotificationsModal &&
+        !showForYouFeed &&
+        !showEconomicCalendar &&
+        !showSavedArticles &&
+        !showCountryList
+      ) {
+        idleTimer = setTimeout(() => {
+          setIsTourActive(true);
+        }, 28000);
+      }
+    };
+
+    const handleActivity = () => {
+      resetIdleTimer();
+    };
+
+    window.addEventListener('pointerdown', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+    window.addEventListener('touchstart', handleActivity);
+
+    resetIdleTimer();
+
+    return () => {
+      clearTimeout(idleTimer);
+      window.removeEventListener('pointerdown', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      window.removeEventListener('touchstart', handleActivity);
+    };
+  }, [
+    selectedCountry,
+    selectedArticle,
+    showDailyBriefing,
+    showGeminiChat,
+    showProfileModal,
+    showNotificationsModal,
+    showForYouFeed,
+    showEconomicCalendar,
+    showSavedArticles,
+    showCountryList,
+  ]);
+
   // Update unread notification count
   const refreshUnreadCount = useCallback(() => {
     const notifs = getNotifications();
@@ -139,7 +210,6 @@ export default function App() {
         setSelectedArticle(found);
         return;
       }
-      // If not in current list, search curated
       const allCurated = Object.values(CURATED_NEWS).flat();
       const match = allCurated.find((a) => a.id === articleId);
       if (match) {
@@ -161,7 +231,6 @@ export default function App() {
   useEffect(() => {
     if (!userProfile.notificationsEnabled) return;
 
-    // Trigger initial notification after 8 seconds if never received
     const initialTimer = setTimeout(() => {
       const existing = getNotifications();
       if (existing.length === 0) {
@@ -178,7 +247,6 @@ export default function App() {
       }
     }, 8000);
 
-    // Periodic check every 3 minutes
     const interval = setInterval(() => {
       if (!userProfile.notificationsEnabled) return;
       const candidates = allArticles.filter((art) => art.isBreaking);
@@ -212,12 +280,15 @@ export default function App() {
         setShowEconomicCalendar(false);
         setShowSavedArticles(false);
         setShowCountryList(false);
+        setShowDailyBriefing(false);
         setIsTourActive(false);
       } else if (e.code === 'Space') {
         e.preventDefault();
         setAutoRotate((prev) => !prev);
       } else if (e.key === 'c' || e.key === 'C') {
         setShowGeminiChat((prev) => !prev);
+      } else if (e.key === 'b' || e.key === 'B') {
+        setShowDailyBriefing((prev) => !prev);
       } else if (e.key === 'p' || e.key === 'P') {
         setShowProfileModal((prev) => !prev);
       } else if (e.key === 'n' || e.key === 'N') {
@@ -263,7 +334,7 @@ export default function App() {
         theme === 'dark' ? 'bg-[#02030a]' : 'bg-[#eef2fb]'
       }`}
     >
-      {/* 3D Interactive World Globe (Full background Canvas) */}
+      {/* 3D Interactive World Globe (Full background Canvas with Day/Night & Earthquakes) */}
       <GlobeCanvas
         selectedCountry={selectedCountry}
         onSelectCountry={handleSelectCountry}
@@ -273,6 +344,22 @@ export default function App() {
         filterCategory={filterCategory}
         filterTimeRange={filterTimeRange}
         tourCountry={currentTourCountry}
+        isTourActive={isTourActive}
+        onToggleNewsTour={() => {
+          setIsTourActive((prev) => {
+            const next = !prev;
+            if (next) {
+              setSelectedCountry(null);
+              setSelectedArticle(null);
+            }
+            return next;
+          });
+        }}
+        showTerminator={showTerminator}
+        onToggleTerminator={() => setShowTerminator((prev) => !prev)}
+        showEarthquakes={showEarthquakes}
+        onToggleEarthquakes={() => setShowEarthquakes((prev) => !prev)}
+        earthquakes={earthquakes}
       />
 
       {/* Floating In-App Push Notification Alert Banner */}
@@ -290,6 +377,7 @@ export default function App() {
         unreadNotificationsCount={unreadNotifCount}
         userProfile={userProfile}
         onOpenProfile={() => setShowProfileModal(true)}
+        onOpenDailyBriefing={() => setShowDailyBriefing(true)}
       />
 
       {/* Vertical Left Icon Rail with Managed Tooltips */}
@@ -299,6 +387,7 @@ export default function App() {
         onOpenEconomicCalendar={() => setShowEconomicCalendar(true)}
         onOpenSavedArticles={() => setShowSavedArticles(true)}
         onOpenProfile={() => setShowProfileModal(true)}
+        onOpenDailyBriefing={() => setShowDailyBriefing(true)}
         isTourActive={isTourActive}
         onToggleNewsTour={() => {
           setIsTourActive((prev) => {
@@ -314,12 +403,12 @@ export default function App() {
 
       {/* Live Breaking News Ticker */}
       {!selectedCountry && !isTourActive && (
-        <div className="fixed top-[calc(env(safe-area-inset-top,0px)+68px)] left-16 sm:left-24 right-3.5 sm:right-84 max-w-xl mx-auto z-20 pointer-events-auto">
+        <div className="fixed top-[calc(env(safe-area-inset-top,0px)+68px)] left-14 sm:left-24 right-3.5 sm:right-84 max-w-xl mx-auto z-20 pointer-events-auto">
           <BreakingNewsTicker onSelectCountryName={handleSelectCountryByName} />
         </div>
       )}
 
-      {/* Trending "Sedang Hangat" Collapsible Floating Panel */}
+      {/* Trending "Sedang Hangat" Panel (Floating Card on Desktop, Bottom Sheet on Mobile) */}
       {!selectedCountry && !isTourActive && (
         <TrendingNewsPanel
           articles={allArticles}
@@ -380,6 +469,15 @@ export default function App() {
           onOpenAIChat={() => setShowGeminiChat(true)}
         />
       )}
+
+      {/* Daily Briefing 60-Sec Audio Modal */}
+      <DailyBriefingModal
+        isOpen={showDailyBriefing}
+        onClose={() => setShowDailyBriefing(false)}
+        articles={allArticles}
+        onFlyToCountry={handleSelectCountryByName}
+        onOpenArticle={handleOpenArticle}
+      />
 
       {/* Standalone Economic Calendar View */}
       {showEconomicCalendar && (
