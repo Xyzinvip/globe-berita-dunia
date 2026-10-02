@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import worldAtlasData from 'world-atlas/countries-110m.json';
 import { CountryInfo } from '../types';
-import { getCountryInfo } from '../data/countries';
+import { getCountryInfo, COUNTRIES_DATA } from '../data/countries';
+import { CURATED_NEWS } from '../data/newsData';
+import { CyberTelemetryHUD } from './CyberTelemetryHUD';
 
 interface GlobeCanvasProps {
   selectedCountry: CountryInfo | null;
@@ -24,14 +26,46 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
   const starsRef = useRef<HTMLCanvasElement | null>(null);
   const projRef = useRef<d3.GeoProjection>(d3.geoOrthographic().clipAngle(90));
   const [scaleFactor, setScaleFactor] = useState(1);
+  const scaleFactorRef = useRef(1);
   const isDraggingRef = useRef(false);
   const lastPointerRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const pointersMapRef = useRef<Map<number, { x: number; y: number }>>(new Map());
   const initialPinchDistRef = useRef<number | null>(null);
   const animFrameRef = useRef<number | null>(null);
+  const flyAnimRef = useRef<number | null>(null);
   const starAnimRef = useRef<number | null>(null);
   const countriesFeaturesRef = useRef<GeoJSON.Feature[]>([]);
   const ringAngleRef = useRef(0);
+  const [hudDismissed, setHudDismissed] = useState(false);
+
+  // Sync scaleFactor state to ref
+  useEffect(() => {
+    scaleFactorRef.current = scaleFactor;
+  }, [scaleFactor]);
+
+  // Reset HUD dismissed flag on country change
+  useEffect(() => {
+    setHudDismissed(false);
+  }, [selectedCountry]);
+
+  // Pre-calculate active news locations for Spatial Wave Pulses
+  const newsPulseLocations = useMemo(() => {
+    const list: { name: string; center: [number, number]; isBreaking: boolean }[] = [];
+    for (const [countryName, articles] of Object.entries(CURATED_NEWS)) {
+      const info = COUNTRIES_DATA[countryName];
+      if (info && info.center) {
+        const isBreaking = articles.some(
+          (a) => Boolean(a.isBreaking)
+        );
+        list.push({
+          name: countryName,
+          center: info.center,
+          isBreaking,
+        });
+      }
+    }
+    return list;
+  }, []);
 
   // Color palette based on theme
   const colors = theme === 'dark' ? {
@@ -165,10 +199,11 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
 
       const proj = projRef.current;
       const isSheetOpen = !!selectedCountry;
+      const curScale = scaleFactorRef.current;
       const baseRadius = Math.min(width, height * 0.82) * 0.44;
       const currentRadius = isSheetOpen
-        ? Math.min(baseRadius * scaleFactor * 0.72, height * 0.22)
-        : baseRadius * scaleFactor;
+        ? Math.min(baseRadius * curScale * 0.72, height * 0.22)
+        : baseRadius * curScale;
       const centerY = isSheetOpen ? height * 0.26 : height * 0.45;
 
       proj.scale(currentRadius).translate([width / 2, centerY]);
@@ -274,6 +309,158 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         }
       }
 
+      // --- Spatial News Wave / Pulse Layer (Step 2: Concentric fading neon rings) ---
+      const curRot = proj.rotate();
+      const centerLng = -curRot[0];
+      const centerLat = -curRot[1];
+
+      for (let i = 0; i < newsPulseLocations.length; i++) {
+        const item = newsPulseLocations[i];
+        const dist = d3.geoDistance(item.center, [centerLng, centerLat]);
+        if (dist > Math.PI / 2 - 0.08) continue; // Behind visible hemisphere
+
+        const pt = proj(item.center);
+        if (!pt || !isFinite(pt[0]) || !isFinite(pt[1])) continue;
+
+        const isBreaking = item.isBreaking;
+        const baseColor = isBreaking ? '#ff3b30' : '#00F3FF';
+        const waveScale = Math.min(2.0, Math.max(0.8, curScale));
+
+        // 3 concentric fading wave pulses
+        for (let w = 0; w < 3; w++) {
+          const phase = ((timestamp / 2000) + (w * 0.33) + (i * 0.15)) % 1;
+          const ringRadius = 4 + phase * 26 * waveScale;
+          const alpha = (1 - phase) * 0.85;
+
+          ctx.beginPath();
+          ctx.arc(pt[0], pt[1], ringRadius, 0, Math.PI * 2);
+          ctx.strokeStyle = isBreaking
+            ? `rgba(255, 59, 48, ${alpha})`
+            : `rgba(0, 243, 255, ${alpha})`;
+          ctx.lineWidth = Math.max(0.8, 1.8 * (1 - phase * 0.4));
+          ctx.stroke();
+        }
+
+        // Center glowing beacon core
+        ctx.beginPath();
+        ctx.arc(pt[0], pt[1], 3.2, 0, Math.PI * 2);
+        ctx.fillStyle = baseColor;
+        ctx.shadowColor = baseColor;
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // White core highlight
+        ctx.beginPath();
+        ctx.arc(pt[0], pt[1], 1.2, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+      }
+
+      // --- Holographic Target Reticle / Crosshair HUD Lock (Step 3) ---
+      if (selectedCountry && selectedCountry.center) {
+        const dist = d3.geoDistance(selectedCountry.center, [centerLng, centerLat]);
+        if (dist < Math.PI / 2) {
+          const pt = proj(selectedCountry.center);
+          if (pt && isFinite(pt[0]) && isFinite(pt[1])) {
+            const [tx, ty] = pt;
+            const reticleSize = 20 * Math.min(1.8, Math.max(0.9, curScale));
+            const armLen = 7;
+
+            ctx.save();
+            ctx.strokeStyle = '#00F3FF';
+            ctx.shadowColor = '#00F3FF';
+            ctx.shadowBlur = 10;
+            ctx.lineWidth = 1.8;
+
+            // 4 Corner Brackets: ⌜ ⌝ ⌞ ⌟
+            ctx.beginPath();
+            // Top-Left
+            ctx.moveTo(tx - reticleSize, ty - reticleSize + armLen);
+            ctx.lineTo(tx - reticleSize, ty - reticleSize);
+            ctx.lineTo(tx - reticleSize + armLen, ty - reticleSize);
+            // Top-Right
+            ctx.moveTo(tx + reticleSize - armLen, ty - reticleSize);
+            ctx.lineTo(tx + reticleSize, ty - reticleSize);
+            ctx.lineTo(tx + reticleSize, ty - reticleSize + armLen);
+            // Bottom-Left
+            ctx.moveTo(tx - reticleSize, ty + reticleSize - armLen);
+            ctx.lineTo(tx - reticleSize, ty + reticleSize);
+            ctx.lineTo(tx - reticleSize + armLen, ty + reticleSize);
+            // Bottom-Right
+            ctx.moveTo(tx + reticleSize - armLen, ty + reticleSize);
+            ctx.lineTo(tx + reticleSize, ty + reticleSize);
+            ctx.lineTo(tx + reticleSize, ty + reticleSize - armLen);
+            ctx.stroke();
+
+            // Cardinal Crosshair Ticks
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(tx, ty - reticleSize - 3);
+            ctx.lineTo(tx, ty - reticleSize - 10);
+            ctx.moveTo(tx, ty + reticleSize + 3);
+            ctx.lineTo(tx, ty + reticleSize + 10);
+            ctx.moveTo(tx - reticleSize - 3, ty);
+            ctx.lineTo(tx - reticleSize - 10, ty);
+            ctx.moveTo(tx + reticleSize + 3, ty);
+            ctx.lineTo(tx + reticleSize + 10, ty);
+            ctx.stroke();
+
+            // Rotating Dashed Circle Reticle
+            ctx.save();
+            ctx.translate(tx, ty);
+            ctx.rotate(timestamp * 0.0018);
+            ctx.beginPath();
+            ctx.setLineDash([3, 5]);
+            ctx.arc(0, 0, reticleSize * 1.3, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(0, 243, 255, 0.65)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.restore();
+
+            // Holographic Leader Line & Canvas HUD Readout
+            const leaderStartX = tx + reticleSize;
+            const leaderStartY = ty - reticleSize * 0.6;
+            const leaderMidX = leaderStartX + 28;
+            const leaderMidY = leaderStartY - 20;
+            const leaderEndX = leaderMidX + 80;
+
+            ctx.beginPath();
+            ctx.setLineDash([]);
+            ctx.strokeStyle = 'rgba(0, 243, 255, 0.75)';
+            ctx.lineWidth = 1.2;
+            ctx.moveTo(leaderStartX, leaderStartY);
+            ctx.lineTo(leaderMidX, leaderMidY);
+            ctx.lineTo(leaderEndX, leaderMidY);
+            ctx.stroke();
+
+            // Leader anchor point
+            ctx.beginPath();
+            ctx.arc(leaderStartX, leaderStartY, 2, 0, Math.PI * 2);
+            ctx.fillStyle = '#00F3FF';
+            ctx.fill();
+
+            // HUD Text Readout next to leader line
+            ctx.font = 'bold 9px monospace';
+            ctx.fillStyle = '#00F3FF';
+            ctx.fillText(
+              `TARGET LOCK: ${selectedCountry.code || selectedCountry.name.slice(0, 3).toUpperCase()}`,
+              leaderMidX + 4,
+              leaderMidY - 4
+            );
+            ctx.font = '8px monospace';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.fillText(
+              `LAT ${selectedCountry.center[1].toFixed(1)}° LNG ${selectedCountry.center[0].toFixed(1)}°`,
+              leaderMidX + 4,
+              leaderMidY + 10
+            );
+
+            ctx.restore();
+          }
+        }
+      }
+
       // Outer rim edge highlight
       ctx.beginPath();
       path({ type: 'Sphere' });
@@ -286,7 +473,7 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
       ctx.shadowBlur = 0;
       ctx.globalAlpha = 1;
     },
-    [selectedCountry, scaleFactor, colors]
+    [selectedCountry, scaleFactor, colors, newsPulseLocations]
   );
 
   // Smooth rotation animation loop
@@ -313,16 +500,22 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
     };
   }, [autoRotate, selectedCountry, drawGlobe]);
 
-  // Smooth fly to selected country
+  // Smooth fly to selected country with Camera Zoom
   const flyToCountry = useCallback(
     (country: CountryInfo) => {
+      if (flyAnimRef.current) {
+        cancelAnimationFrame(flyAnimRef.current);
+      }
       const proj = projRef.current;
       const targetCoords = country.center; // [lng, lat]
       const fromRotate = proj.rotate();
       const toRotate: [number, number] = [-targetCoords[0], -targetCoords[1]];
       const interpolate = d3.interpolate(fromRotate, [toRotate[0], toRotate[1], 0]);
+
+      const fromScale = scaleFactorRef.current;
+      const targetScale = Math.max(1.35, Math.min(1.6, fromScale >= 1.2 ? fromScale : 1.38));
       const startTime = performance.now();
-      const duration = 650; // ms
+      const duration = 750; // ms
 
       const step = (now: number) => {
         const elapsed = now - startTime;
@@ -331,14 +524,20 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         const ease = 1 - Math.pow(1 - progress, 3);
         const nextRot = interpolate(ease);
         proj.rotate([nextRot[0], nextRot[1], nextRot[2] || 0]);
+
+        const nextScale = fromScale + (targetScale - fromScale) * ease;
+        scaleFactorRef.current = nextScale;
         drawGlobe(now);
 
         if (progress < 1) {
-          requestAnimationFrame(step);
+          flyAnimRef.current = requestAnimationFrame(step);
+        } else {
+          flyAnimRef.current = null;
+          setScaleFactor(targetScale);
         }
       };
 
-      requestAnimationFrame(step);
+      flyAnimRef.current = requestAnimationFrame(step);
     },
     [drawGlobe]
   );
@@ -470,13 +669,17 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         onWheel={handleWheel}
       />
 
-      {/* Interactive Controls Overlay */}
+      {/* Interactive Controls Overlay (Dark Glassmorphism) */}
       <div className="absolute bottom-6 right-4 flex flex-col gap-2.5 z-20">
         {/* Reset Zoom */}
         <button
-          onClick={() => setScaleFactor(1)}
-          title="Reset Zoom"
-          className="w-11 h-11 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-cyan-500/25 text-cyan-300 flex items-center justify-center shadow-lg active:scale-92 transition"
+          onClick={() => {
+            scaleFactorRef.current = 1;
+            setScaleFactor(1);
+            drawGlobe(performance.now());
+          }}
+          title="Reset Zoom (1x)"
+          className="w-11 h-11 rounded-2xl bg-[#0a0e17]/80 backdrop-blur-xl border border-cyan-500/30 text-cyan-300 flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.12)] active:scale-92 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(0,243,255,0.25)] transition-all"
         >
           <span className="text-xs font-bold tracking-tight">1x</span>
         </button>
@@ -485,10 +688,10 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         <button
           onClick={onToggleAutoRotate}
           title={autoRotate ? 'Hentikan Putaran' : 'Putar Otomatis'}
-          className={`w-11 h-11 rounded-2xl backdrop-blur-xl border transition flex items-center justify-center shadow-lg active:scale-92 ${
+          className={`w-11 h-11 rounded-2xl backdrop-blur-xl border transition-all flex items-center justify-center shadow-lg active:scale-92 ${
             autoRotate
-              ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-cyan-500/20'
-              : 'bg-slate-900/80 border-slate-700/60 text-slate-400 hover:text-slate-200'
+              ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 shadow-[0_0_20px_rgba(0,243,255,0.3)]'
+              : 'bg-[#0a0e17]/80 border-cyan-500/20 text-slate-400 hover:text-slate-200 hover:border-cyan-500/40'
           }`}
         >
           <svg className={`w-5 h-5 ${autoRotate ? 'animate-spin' : ''}`} style={{ animationDuration: '6s' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -498,12 +701,20 @@ export const GlobeCanvas: React.FC<GlobeCanvasProps> = ({
         </button>
       </div>
 
+      {/* Cyber-Typing HUD Telemetry Overlay on Country Selection */}
+      {selectedCountry && !hudDismissed && (
+        <CyberTelemetryHUD
+          country={selectedCountry}
+          onDismiss={() => setHudDismissed(true)}
+        />
+      )}
+
       {/* Hint overlay */}
       {!selectedCountry && (
         <div className="absolute bottom-5 left-0 right-0 text-center pointer-events-none z-10 transition-opacity">
-          <p className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-950/70 backdrop-blur-md border border-cyan-500/20 text-xs text-cyan-200/80 shadow-md">
+          <p className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#070e1c]/80 backdrop-blur-md border border-cyan-500/25 text-xs text-cyan-200/90 shadow-[0_0_15px_rgba(0,243,255,0.1)]">
             <span>🌍</span>
-            <span>Geser untuk memutar · Cubit untuk zoom · Ketuk negara untuk baca berita langsung</span>
+            <span>Geser untuk memutar · Cubit untuk zoom · Ketuk negara untuk kunci target & baca berita</span>
           </p>
         </div>
       )}
